@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 17:03:35 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/01/11 12:02:40 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/01/11 20:15:19 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,8 +97,8 @@ int main() {
             else
             {
                 ret = recv(events[i].data.fd, buffer, sizeof(buffer), 0);
-                if (ret == 0)
-                    epoll_ctl(epollFd, EPOLL_CTL_DEL, clientSocket, &event);
+                // if (ret == 0)
+                //     epoll_ctl(epollFd, EPOLL_CTL_DEL, clientSocket, &event);
                 // std::cout << "phrase recup : [" << buffer << "]" << std::endl;
                 std::vector<int>::iterator it = std::find(welcomeSocket.begin(), welcomeSocket.end(), clientSocket);
                 if (it == welcomeSocket.end()) 
