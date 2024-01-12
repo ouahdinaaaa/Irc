@@ -1,88 +1,62 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
+/*   Serveur.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/05 17:03:35 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/01/12 18:48:26 by ayael-ou         ###   ########.fr       */
+/*   Created: 2024/01/12 11:23:33 by ayael-ou          #+#    #+#             */
+/*   Updated: 2024/01/12 19:03:40 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <iostream>
-#include <vector>
-#include <algorithm>
-#include <cmath>
-#include <cstring>
-#include <unistd.h>
-#include <sys/epoll.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include "./include/Irc.hpp"
-#include "./include/serveur.hpp"
-#include <sys/socket.h>
+#include "../include/serveur.hpp"
 
-# define RPL_WELCOME(nickname) (":localhost 001 " + nickname + " :Welcome to the Internet Relay Network " + nickname + "\r")
+
+
 
 const int MAX_EVENTS = 10;
+
+void    serveur::JoinCommand(const std::string &channelName, const std::string &userName)
+{
+    Channel Name(channelName);
+    std::vector<Channel>::iterator it = std::find(this->_channel.begin(), this->_channel.end(), Name);
+    // std::vector<Channel>::iterator it = std::find(this->_channel.begin(), this->_channel.end(), std::string(channelName.c_str()));
+    if (it != this->_channel.end())
+    {
+        it->Add(userName);
+        SendRPL(this->_socket, "Bienvenue sur le canal par defaut : ");
+        // send Message to cient RPL;
+    }
+    else
+    {
+        Channel NewChan(channelName);
+        NewChan.Add(userName);
+        this->_channel.push_back(NewChan);
+        SendRPL(this->_socket, "Bienvenue sur le canal par defaut : ");
+        //Envoyer msg To client RPL;
+    }
+    return ; 
+}
+
+void    SendRPL(int socket, const char *message)
+{
+    send(socket, message, strlen(message), 0);
+}
+
 
 void setNonBlocking(int sockfd) {
     int flags = fcntl(sockfd, F_GETFL, 0);
     fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
 }
 
-int main() {
-
-    int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-    if (serverSocket == -1) {
-        // Gestion de l'erreur
-        return -1;
-    }
-    
-    sockaddr_in serverAddress;
-    serverAddress.sin_family = AF_INET;
-    serverAddress.sin_port = htons(6667); // Port IRC standard
-    serverAddress.sin_addr.s_addr = INADDR_ANY;
-
-    serveur Princip();
-    if (bind(serverSocket, (sockaddr*)&serverAddress, sizeof(serverAddress)) == -1) {
-        // Gestion de l'erreur
-        close(serverSocket);
-        return -1;
-    }
-
-    if (listen(serverSocket, SOMAXCONN) == -1) {
-        // Gestion de l'erreur
-        close(serverSocket);
-        return -1;
-    }
-    
-    int epollFd = epoll_create1(0);
-    if (epollFd == -1) {
-        // Gestion de l'erreur
-        close(serverSocket);
-        return -1;
-    }
-
-    epoll_event event;
-    event.events = EPOLLIN | EPOLLET; // Événements à surveiller (lecture et mode Edge Triggered)
-    event.data.fd = serverSocket;
-
-    if (epoll_ctl(epollFd, EPOLL_CTL_ADD, serverSocket, &event) == -1) {
-        // Gestion de l'erreur
-        close(serverSocket);
-        close(epollFd);
-        return -1;
-    }
-
-    epoll_event* events = new epoll_event[MAX_EVENTS];
-
+void    serveur::connexion(int ret, int epollFd, int serverSocket)
+{
     char buffer[1024];
-    int ret;
+    epoll_event event;
     std::vector<int> welcomeSocket;
+    epoll_event* events = new epoll_event[MAX_EVENTS];
+    event.events = EPOLLIN | EPOLLET; 
     int clientSocket;
     while (true) {
         int numEvents = epoll_wait(epollFd, events, MAX_EVENTS, -1);
@@ -108,7 +82,7 @@ int main() {
                 {
                     // free close break 
                     std::cout << "test" << std::endl;
-                    return 1;
+                    return ;
                 }
                 else if (ret == 0)
                 {
@@ -133,8 +107,4 @@ int main() {
             }
         }
     }
-    delete[] events;
-    close(serverSocket);
-    close(epollFd);
-    return 0;
 }

@@ -6,7 +6,7 @@
 #    By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/05 17:03:19 by ayael-ou          #+#    #+#              #
-#    Updated: 2024/01/05 17:04:25 by ayael-ou         ###   ########.fr        #
+#    Updated: 2024/01/12 18:18:16 by ayael-ou         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,6 +14,8 @@ NAME = IrcServ
 
 SRC_DIR = ./
 SRCS = 	main.cpp\
+		Srcs/Channel.cpp\
+		./Srcs/Serveur.cpp\
 
 OBJS = ${SRCS:.cpp=.o}
 CC = c++
