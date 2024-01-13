@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/08 17:36:06 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/01/12 19:05:19 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/01/13 19:00:19 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,17 +44,18 @@ class serveur
         
         public:
         serveur() : _channel() {};
-        serveur(const std::string &port, std::string &mdp) : _port(atoi(port.c_str())), _mdp(mdp), 
-        {};
+        serveur(char *port, char *mdp);
         ~serveur() {};
         // bool    start(int port);
         void    JoinCommand(const std::string &channelName, const std::string &userName);
         // void    finish();
-        void    firstParam();
-        void    connexion(int ret, int epollFd, int serverSocket); // gere les connexion entrante
+        int     FirstParam();
+        void    Use(std::string command);
+        void    connexion(int epollFd); // gere les connexion entrante
+        void    retrieve_cmd(int ret, char *buffer, epoll_event* events, int i);
         // void    Conexion_client(Client &client);
 };
 
-void    SendRPL(int socket, const char *message);
+void    SendRPL(int socket, std::string message);
 
 #endif

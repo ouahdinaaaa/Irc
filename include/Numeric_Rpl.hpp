@@ -1,5 +1,5 @@
 #ifndef NUMERIC_RPL_HPP
-# define  NUMERIC_RPL_HPP__
+# define  NUMERIC_RPL_HPP
 
 # define user_id(nickname, username, cmd) (":" + nickname + "!~" + username + "@localhost " + cmd + " ") // used
 
