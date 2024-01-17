@@ -6,11 +6,12 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/09 19:42:15 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/01/12 18:29:16 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/01/15 18:59:33 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/Channel.hpp"
+#include "../include/Client.hpp"
 
 void        Channel::send_message(const std::string &name)
 {
@@ -28,15 +29,11 @@ Channel::Channel(const Channel &other)
     *this = other;
 }
 
-void    Channel::Add(const std::string &user)
+void    Channel::Add(Client user)
 {
     this->_list.push_back(user);
 }
 
-std::string &Channel::getname()
-{
-    return this->_name;
-}
 
 bool    Channel::operator==(const Channel &other) const
 {

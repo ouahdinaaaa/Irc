@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/08 17:36:06 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/01/13 19:00:19 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/01/17 17:16:09 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,22 +38,26 @@ class serveur
     private:
         int                  _socket;
         std::string          _mdp;
+        std::string          _mdprecu;
         int                  _port;
-        // std::vector<Client> Client; // creation liste de cliens co
         std::vector<Channel> _channel;
+        std::vector<Client>  _client;
+        int                  _ret;
         
         public:
-        serveur() : _channel() {};
+        serveur() : _channel(), _client(), _ret(1) {};
         serveur(char *port, char *mdp);
         ~serveur() {};
-        // bool    start(int port);
-        void    JoinCommand(const std::string &channelName, const std::string &userName);
-        // void    finish();
+        void    JoinCommand(const std::string &channelName, Client userName);
         int     FirstParam();
-        void    Use(std::string command);
+        void    Use(std::string command, int socket);
+        Client  getUser(int socket);
+        void    Password(std::string &msg, int socket);
+        void    SendMsg(Channel &Channel, std::string &msg, int socket);
+        void    PrivChannel(Channel &Channel, int socket, std::string &msg);
         void    connexion(int epollFd); // gere les connexion entrante
+        void    PrivMsg(std::string &channel, std::string &msg, int socket);
         void    retrieve_cmd(int ret, char *buffer, epoll_event* events, int i);
-        // void    Conexion_client(Client &client);
 };
 
 void    SendRPL(int socket, std::string message);
