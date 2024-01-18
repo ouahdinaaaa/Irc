@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/09 19:42:15 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/01/15 18:59:33 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/01/18 17:44:18 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ void    Channel::Add(Client user)
 }
 
 
-bool    Channel::operator==(const Channel &other) const
+bool    Channel::operator==(const Channel &other)
 {
     return (this->_name == other._name);
 }

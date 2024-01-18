@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/08 17:06:55 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/01/15 18:52:18 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/01/18 17:43:57 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,11 +22,14 @@ class Channel
         std::string                     _name;
         std::vector<Client>             _list;
         std::vector<std::string>        _Banned;
+        // int                             _key;
+        // std::string                     _mdp;
     
     public:
     Channel(const std::string &name) : _name(name), _list(), _Banned() {};
+    // Channel(const std::string &name, std::string &mdp) : _name(name), _key(1), _mdp(mdp) {};
     Channel(const Channel &other);
-    bool    operator==(const Channel &other) const;
+    bool    operator==(const Channel &other);
     Channel &operator=(const Channel &other);
     void    send_message(const std::string &name);
     std::vector<Client>  get_client() { return this->_list; };

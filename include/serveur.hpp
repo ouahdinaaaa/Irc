@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/08 17:36:06 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/01/17 17:16:09 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/01/18 17:42:29 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ class serveur
         ~serveur() {};
         void    JoinCommand(const std::string &channelName, Client userName);
         int     FirstParam();
+        void    PartCommand(std::string &channel, int socket, std::string &reason);
         void    Use(std::string command, int socket);
         Client  getUser(int socket);
         void    Password(std::string &msg, int socket);
