@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/08 17:06:55 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/01/18 17:43:57 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/01/20 18:25:53 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include "Irc.hpp"
 #include "Client.hpp"
+#include "serveur.hpp"
 
 class Channel
 {
@@ -26,19 +27,17 @@ class Channel
         // std::string                     _mdp;
     
     public:
-    Channel(const std::string &name) : _name(name), _list(), _Banned() {};
-    // Channel(const std::string &name, std::string &mdp) : _name(name), _key(1), _mdp(mdp) {};
     Channel(const Channel &other);
-    bool    operator==(const Channel &other);
-    Channel &operator=(const Channel &other);
-    void    send_message(const std::string &name);
-    std::vector<Client>  get_client() { return this->_list; };
-    void    Banned(const std::string &user);
-    // void    DisplayUser();
-    std::string &getname() {return this->_name; };
-    void    Add(Client user);
-    // void    Delete(const std::string &user);
+    Channel(const std::string &name) : _name(name), _list(), _Banned() {};
     ~Channel() {};
+    
+    bool                 operator==(const Channel &other) const { return _name == other._name; };
+    void                 Banned(const std::string &user);
+    void                 Delete(std::vector<Client>::iterator it);
+    void                 Add(Client user);
+    Channel              &operator=(const Channel &other);
+    std::string          &getname() {return this->_name; };
+    std::vector<Client>  get_client() { return this->_list; };
 };
 
 

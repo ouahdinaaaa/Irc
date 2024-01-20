@@ -53,6 +53,8 @@
 
 # define PART_CHANEL(nickname, username, cmd, chanel) (user_id(nickname, username, cmd) + chanel + "\r\n") // used
 
+# define RPL_PART(nickname, channel, reason) (":" + nickname + " PART #" + channel + " :" + reason + "\r\n")
+
 // 353
 # define RPL_NAMREPLY(nickname, chanel, list_client) (":localhost 353 " + nickname + " = " + chanel + " :" + list_client +"\r\n") // used
 // 366

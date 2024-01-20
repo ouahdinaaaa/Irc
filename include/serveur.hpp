@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/08 17:36:06 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/01/18 17:42:29 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/01/20 20:07:33 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@
 
 const int MAX_EVENTS = 10;
 
+class Channel;
 
 class serveur
 {
@@ -48,9 +49,9 @@ class serveur
         serveur() : _channel(), _client(), _ret(1) {};
         serveur(char *port, char *mdp);
         ~serveur() {};
-        void    JoinCommand(const std::string &channelName, Client userName);
+        void    JoinCommand(const std::string &channelName, Client userName, int socket);
         int     FirstParam();
-        void    PartCommand(std::string &channel, int socket, std::string &reason);
+        void    PartCommand(const std::string &channel, int socket, std::string reason);
         void    Use(std::string command, int socket);
         Client  getUser(int socket);
         void    Password(std::string &msg, int socket);

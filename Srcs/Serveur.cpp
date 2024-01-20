@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:23:33 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/01/18 17:25:00 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/01/20 20:30:13 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,8 +59,9 @@ serveur::serveur(char *port, char *mdp) : _mdp(mdp), _port(atoi(port)), _channel
     FirstParam();
 }
 
-void    serveur::JoinCommand(const std::string &channelName, Client userName)
+void    serveur::JoinCommand(const std::string &channelName, Client userName, int socket)
 {
+    (void)socket;
     std::string message;
     Channel Name(channelName);
     std::vector<Channel>::iterator it = std::find(this->_channel.begin(), this->_channel.end(), Name);
@@ -80,7 +81,7 @@ void    serveur::JoinCommand(const std::string &channelName, Client userName)
         message = RPL_JOIN(userName.get_user(), channelName);
         Name = NewChan;
         SendRPL(userName.get_socket(), message);
-        SendMsg(Name, message, userName.get_socket());
+        SendMsg(Name, message, socket);
     }
     return ; 
 }
@@ -153,17 +154,17 @@ void    serveur::connexion(int epollFd)
 }
 
 
-void    serveur::SendMsg(Channel &Channel, std::string &msg, int socket)
+void serveur::SendMsg(Channel &Channel, std::string &msg, int socket)
 {
     Client userName = getUser(socket);
     std::vector<Client>::iterator it;
     std::string message = RPL_PRIVMSG_CHANNEL(userName.get_user(), Channel.getname(), msg);
     for (it = (Channel.get_client()).begin(); it != (Channel.get_client()).end(); ++it) {
-        if ((*it).get_socket() != socket)
+        if ((*it).get_socket() != socket && (*it).get_socket() > 0 && (*it).get_socket() < 1024) {
             SendRPL((*it).get_socket(), message);
+        }
     }
 }
-
 
 void    serveur::PrivChannel(Channel &Channel, int socket, std::string &msg)
 {
@@ -199,29 +200,35 @@ Client serveur::getUser(int socket)
 }
 
 
-void    serveur::PartCommand(std::string &channel, int socket, std::string &reason) 
+
+
+void    serveur::PartCommand(const std::string &channel, int socket, std::string reason) 
 {
-    Channel name(Channel);
+    Channel name(channel);
     Client  user = getUser(socket);
-    // std::string msg = PART_CHANEL()
     std::vector<Channel>::iterator it = std::find(this->_channel.begin(), this->_channel.end(), name);
     if (it != this->_channel.end()){
         std::vector<Client> Chan = it->get_client();
         std::vector<Client>::iterator its = std::find(Chan.begin(), Chan.end(), user);
         if (its != Chan.end()){
-            std::string msg = PART_CHANEL((*its).get_user(), (*its).get_name(), reason, channel);
-            Chan.erase(its);
-            SendMsg(*it, msg, socket);
-            //envoie du RPL a tout les autre client + RPL que le client a bien ete supp
+            std::cout << "open in part command" << std::endl;
+            std::string msg = PART_CHANEL((*its).get_user(), (*its).get_name(), "PART", channel);
+            std::string message = RPL_PART((*its).get_user(), (*it).getname(), reason);
+            SendRPL(socket, message);
+            it->Delete(its);
+            // SendMsg(*it, msg, socket);
+            std::cout << "End send rpl : " << std::endl;
         }
-        else
-        {
-            std::cout << "sorry mauvaise manip" << std::endl;
-            // std::string msg = RPL
-            // SendRPL = 
-            //send RPL au client que le channel nas pas ete trouver.
+        else {
+            std::string message = ERR_NOTONCHANNEL(user.get_user(), channel);
+            SendRPL(socket, message);
         }
     }
+    else {
+        std::string message = ERR_NOSUCHCHANNEL(user.get_name(), channel);
+        SendRPL(socket, message);
+    }
+    std::cout << "Exit !!!" << std::endl;
 }
 
 void    serveur::Use(std::string command, int socket)
@@ -238,7 +245,7 @@ void    serveur::Use(std::string command, int socket)
         Chan = command.substr(size + 1, command.length());
         std::string msg = RPL_WELCOME(Chan);
         Client newClient(Chan, socket);
-        this->_client.push_back(newClient);
+        (*this)._client.push_back(newClient);
         this->_ret = 0;
         std::cout << "----- mdp : [" << _mdp << "]  |||| mdp recu : [" << _mdprecu << "] ----- " << std::endl;
         if (_mdp != _mdprecu)
@@ -254,14 +261,12 @@ void    serveur::Use(std::string command, int socket)
     else if (newCmd == "JOIN"){
         size = command.find('#') + 1;
         Chan = command.substr(size, command.length());
-        JoinCommand(Chan, getUser(socket));
+        JoinCommand(Chan, getUser(socket), socket);
     }
-    else if (newCmd == "USER")
-    {
+    else if (newCmd == "USER") {
         Client user = getUser(socket);
         size_t pos = command.find(' ', size + 1);
         Chan = command.substr(size + 1, pos - (size + 1));
-        // std::cout << "USER in userfonction : [" << Chan << "]" << std::endl;
         user.set_user(Chan);
         std::vector<Client>::iterator it = std::find(this->_client.begin(), this->_client.end(), user);
         if (it != this->_client.end()){
@@ -269,17 +274,30 @@ void    serveur::Use(std::string command, int socket)
             this->_client.push_back(user);
         }
     }
-    else if (newCmd == "PART")
-    {
-        
-    }
-    else if (newCmd == "PRIVMSG"){
-        size = command.find(':');
-        int len = size - command.find('#') - 2;
-        std::string Channel = command.substr((command.find('#') + 1), len);
-        Chan = command.substr(size, command.length());
-        PrivMsg(Channel, Chan, socket);
-    }
+//     else if (newCmd == "PART") {
+//         size = command.find(':');
+//         if (size != -1)
+//         {
+//             int len = size - command.find('#') - 2;
+//             std::string channel = command.substr((command.find('#') + 1), len);
+//             Chan = command.substr(size, command.length());
+//             PartCommand(channel, socket, Chan);
+//         }
+//         else {
+//             size = command.find('#') + 1;
+//             int len = command.length() - size;
+//             std::string channels = command.substr(size, len);
+//             PartCommand(channels, socket, "Good Bye");
+//             // std::cout << "channel : " << channels << std::endl;
+//         }
+//     }
+//     else if (newCmd == "PRIVMSG"){
+//         size = command.find(':');
+//         int len = size - command.find('#') - 2;
+//         std::string Channel = command.substr((command.find('#') + 1), len);
+//         Chan = command.substr(size, command.length());
+//         PrivMsg(Channel, Chan, socket);
+//     }
 }
 
 void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event* events, int i)
