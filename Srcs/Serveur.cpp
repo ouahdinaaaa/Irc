@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:23:33 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/01/30 20:10:49 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/01/31 19:25:59 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,12 +74,13 @@ void    serveur::JoinCommand(const std::string &channelName, Client userName, in
                 return (SendRPL(socket, ERR_INVITEONLYCHAN(userName.get_user(), channelName)));
             if (it->Getmode_l() && it->Getmode_l() == (int)(it->get_client()).size())
                 return(SendRPL(socket, ERR_CHANNELISFULL(userName.get_user(), channelName)));
-            else {
+            if (it->Getmode_k() && it->Getmode_k() != key)
+                return (SendRPL(socket, ERR_BADCHANNELKEY(userName.get_user(), channelName)));
+            else  {
                 std::vector<Client>::iterator its = std::find(this->_client.begin(), this->_client.end(), userName);
                 its->Newlist(channelName);
             }
-            if (it->Getmode_k() && it->Getmode_k() != key)
-                return (SendRPL(socket, ERR_BADCHANNELKEY(userName.get_user(), channelName)));
+            std::cout << "open in here : " << std::endl;
         }
         Namely = RPL_NAMREPLY(userName.get_user(), channelName, (*it).ListClient());
         std::string EndName = RPL_ENDOFNAMES(userName.get_user(), channelName);
@@ -266,8 +267,7 @@ void    serveur::PartCommand(std::string &channel, int socket, std::string reaso
         PrintClient(*it);
         std::vector<Client> Chan = it->get_client();
         std::vector<Client>::iterator its = std::find(Chan.begin(), Chan.end(), user);
-        if (its != Chan.end())
-        {
+        if (its != Chan.end()) {
             std::string msg = PART_CHANEL((*its).get_user(), (*its).get_name(), "PART", nameChannel);
             std::string message = PART((*its).get_user(), (*its).get_name(), (*it).getname(), reason);
             SendRPL(socket, message);
@@ -279,8 +279,7 @@ void    serveur::PartCommand(std::string &channel, int socket, std::string reaso
             SendRPL(socket, message);
         }
     }
-    else 
-    {
+    else  {
         std::string message = ERR_NOSUCHCHANNEL(user.get_name(), channel);
         SendRPL(socket, message);
     }
@@ -292,16 +291,13 @@ void    serveur::Topic(std::string &channel, std::string &topic, int socket)
     std::string  name = _user.get_user();
     std::string  message;
     int newsocket = RetrieveSocketChan(channel, name);
-    if (newsocket < 0)
-    {
+    if (newsocket < 0) {
         if (newsocket == -1)
             message = ERR_NOSUCHCHANNEL(name, channel);
         else
             message = ERR_NOTONCHANNEL(name, channel);
         SendRPL(socket, message);
-    }
-    else 
-    {
+    } else {
         Channel chan(channel);
         std::vector<Channel>::iterator it = std::find(this->_channel.begin(), this->_channel.end(), chan);
         if (it->Getmode_t() && !(_user.GetOperator())){
@@ -344,8 +340,7 @@ int serveur::RetrieveSocketChan(std::string &name, std::string &user)
     std::vector<Channel>::iterator it = std::find(this->_channel.begin(), this->_channel.end(), _name);
     if (it != this->_channel.end()) {
         std::vector<Client> cliennt = it->get_client();
-        for (std::vector<Client>::iterator its = cliennt.begin(); its != cliennt.end(); ++its)
-        {
+        for (std::vector<Client>::iterator its = cliennt.begin(); its != cliennt.end(); ++its) {
             if ((*its).get_user() == user)
                 return ((*its).get_socket());
         }
@@ -356,8 +351,7 @@ int serveur::RetrieveSocketChan(std::string &name, std::string &user)
 
 int     serveur::RetrieveSocket(std::string &name)
 {
-    for (std::vector<Client>::iterator it = this->_client.begin(); it != this->_client.end(); ++it)
-    {
+    for (std::vector<Client>::iterator it = this->_client.begin(); it != this->_client.end(); ++it) {
         if ((*it).get_user() == name)
             return (*it).get_socket();
     }
@@ -381,10 +375,11 @@ void    serveur::KickUser(std::string &channel, std::string &reason, int socket)
     else
     {
         Client userKick = getUser(newsocket);
-        if (userKick.GetImunite()){
-            
-        }
         Client _user = getUser(socket);
+        if (userKick.GetImunite()){
+            message = ERR_NOPRIVILEGES(_user.get_user(), channel);
+            return (SendRPL(socket, message));
+        }
         message = RPL_KICK(_user.get_name(), Chan, user, reason);
         std::vector<Channel>::iterator it = std::find(this->_channel.begin(), this->_channel.end(), name);
         std::vector<Client> list = (*it).get_client();
@@ -415,7 +410,7 @@ void    serveur::Invite(std::string &user, std::string &channel, int socket)
     }
     int targetsock = RetrieveSocket(user);
     if (targetsock < 0)
-        return ; //penser a envoyer msg derreur user dosent existed
+        return(SendRPL(socket, ERR_NOSUCHNICK(name))); //penser a envoyer msg derreur user dosent existed
     if (!_user.GetOperator())
         return (SendRPL(socket, ERR_NOPRIVILEGES(name, channel)));
     // std::cout << "Get operator : [" << _user.GetOperator() << "]" << std::endl;
@@ -454,15 +449,26 @@ void    serveur::Use(std::string command, int socket)
     }
     else if (newCmd == "JOIN"){
         size = command.find('#') + 1;
-        int len = size - command.find(size, ' ') - 4;
+        int len = command.find(' ', size);
         int key = 0;
         std::string keys;
-        Chan = command.substr(size, len);
-        if ((int)command.find(' ', size) != -1)
+        if (len == -1)
         {
+           Chan = command.substr(size, command.length());
+        //    std::cout << "open" << std::endl;
+        }
+        else {
+            // std::cout << "open in" << std::endl;
+            len = command.length() - size - 2;
+            // std::cout << "Len : " << len << " |||| size : " << size << std::endl;
+            Chan = command.substr(size, len);
+        }   
+        if ((int)command.find(' ', size) != -1) {
             keys = command.substr(len + size, command.length());
             key = atoi(keys.c_str());
         }
+        // std::cout << "channel [" << Chan << "] " << std::endl;
+        // std::cout << "Keys [" << keys << "] " << std::endl;
         JoinCommand(Chan, getUser(socket), socket, key);
     }
     else if (newCmd == "USER") {
@@ -484,6 +490,7 @@ void    serveur::Use(std::string command, int socket)
             std::string channel = command.substr((command.find('#') + 1), len);
             Chan = command.substr(size, command.length());
             PartCommand(channel, socket, Chan);
+            std::cout << "Channel in part [" << channel << "]" << std::endl;
         }
         else 
         {
@@ -491,6 +498,7 @@ void    serveur::Use(std::string command, int socket)
             int len = command.length() - size;
             std::string channels = command.substr(size, len);
             PartCommand(channels, socket, "Good Bye");
+            std::cout << "Channel in part [" << channels << "]" << std::endl;
         }
     }
     int len_size = command.find('#');
