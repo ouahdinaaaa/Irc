@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:23:33 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/01/31 19:25:59 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/01 16:38:07 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,17 +70,17 @@ void    serveur::JoinCommand(const std::string &channelName, Client userName, in
     if (it != this->_channel.end()) {
         if (it->Getmode_i() || (it->Getmode_l() && it->Getmode_l() == (int)(it->get_client()).size()) || it->Getmode_k()) 
         {
-            if (it->Getmode_i() && !userName.VerifInvitation(channelName))
+            if (it->Getmode_i() && !userName.VerifInvitation(channelName) && !userName.GetOperator())
                 return (SendRPL(socket, ERR_INVITEONLYCHAN(userName.get_user(), channelName)));
-            if (it->Getmode_l() && it->Getmode_l() == (int)(it->get_client()).size())
+            if (it->Getmode_l() && it->Getmode_l() == (int)(it->get_client()).size() && !userName.GetOperator())
                 return(SendRPL(socket, ERR_CHANNELISFULL(userName.get_user(), channelName)));
-            if (it->Getmode_k() && it->Getmode_k() != key)
+            if (it->Getmode_k() && it->Getmode_k() != key && !userName.GetOperator())
                 return (SendRPL(socket, ERR_BADCHANNELKEY(userName.get_user(), channelName)));
             else  {
                 std::vector<Client>::iterator its = std::find(this->_client.begin(), this->_client.end(), userName);
                 its->Newlist(channelName);
             }
-            std::cout << "open in here : " << std::endl;
+            // std::cout << "open in here : " << std::endl;
         }
         Namely = RPL_NAMREPLY(userName.get_user(), channelName, (*it).ListClient());
         std::string EndName = RPL_ENDOFNAMES(userName.get_user(), channelName);
@@ -240,10 +240,10 @@ void    serveur::PrivMsgClient(std::string &name, std::string &message, int sock
     std::string msg = RPL_PRIVMSG_CLIENT(user.get_user(), user.get_name(), name, message);
     if (newsocket == -1)
     {
-        std::cout << "Pas de user avec ce name" << std::endl;
+        // std::cout << "Pas de user avec ce name" << std::endl;
         return ;
     }
-    std::cout << "newsocket : " << newsocket << std::endl;
+    // std::cout << "newsocket : " << newsocket << std::endl;
     SendRPL(newsocket, msg);
 }
 
@@ -321,15 +321,20 @@ void    serveur::ConfigMode(std::string &channel, std::string &mode, int socket)
     std::string message;
     int newsocket = RetrieveSocketChan(channel, name);
     if (newsocket < 0) {
-        std::cout << "socket retreiev : " << newsocket << std::endl;
+        // std::cout << "socket retreiev : " << newsocket << std::endl;
         if (newsocket == -1)
             message = ERR_NOSUCHCHANNEL(name, channel);
         else
             message = ERR_NOTONCHANNEL(name, channel);
         return (SendRPL(socket, message));
     }
+    if (mode.length() < 2)
+        return ;
+    // std::cout << "open in mode : [" << mode << "] ||| channnel is : [" << channel << "]" << std::endl;
     std::vector<Channel>::iterator it = std::find(this->_channel.begin(), this->_channel.end(), Name);
     if (it != this->_channel.end()){
+        if (!_user.GetOperator())
+            return (SendRPL(socket, ERR_NOPRIVILEGES(name, channel)));
         it->choice_mode(mode, _user, channel, socket);
     }
 }
@@ -453,22 +458,15 @@ void    serveur::Use(std::string command, int socket)
         int key = 0;
         std::string keys;
         if (len == -1)
-        {
            Chan = command.substr(size, command.length());
-        //    std::cout << "open" << std::endl;
-        }
         else {
-            // std::cout << "open in" << std::endl;
-            len = command.length() - size - 2;
-            // std::cout << "Len : " << len << " |||| size : " << size << std::endl;
+            len = command.length() - size - 3;
             Chan = command.substr(size, len);
         }   
         if ((int)command.find(' ', size) != -1) {
             keys = command.substr(len + size, command.length());
             key = atoi(keys.c_str());
         }
-        // std::cout << "channel [" << Chan << "] " << std::endl;
-        // std::cout << "Keys [" << keys << "] " << std::endl;
         JoinCommand(Chan, getUser(socket), socket, key);
     }
     else if (newCmd == "USER") {
@@ -490,7 +488,6 @@ void    serveur::Use(std::string command, int socket)
             std::string channel = command.substr((command.find('#') + 1), len);
             Chan = command.substr(size, command.length());
             PartCommand(channel, socket, Chan);
-            std::cout << "Channel in part [" << channel << "]" << std::endl;
         }
         else 
         {
@@ -498,7 +495,6 @@ void    serveur::Use(std::string command, int socket)
             int len = command.length() - size;
             std::string channels = command.substr(size, len);
             PartCommand(channels, socket, "Good Bye");
-            std::cout << "Channel in part [" << channels << "]" << std::endl;
         }
     }
     int len_size = command.find('#');
@@ -545,7 +541,6 @@ void    serveur::Use(std::string command, int socket)
     {
         size = command.find('#') + 1;
         std::string channel = command.substr(size, command.length());
-        // std::cout << "channel in Name : [" << channel << "]" << std::endl;
         Names(channel, socket);
     }
     if (newCmd == "MODE")
@@ -555,15 +550,22 @@ void    serveur::Use(std::string command, int socket)
             int len = command.find(' ', 5) - 5;
             std::string user = command.substr(5, len);
             std::string mode = command.substr(command.find(' ', 5) + 1, command.length());                    
-            // std::cout << "---------- User : [" << user << "]---------\n" << std::endl;
-            // std::cout << "---------- Mode : [" << mode << "]---------\n" << std::endl;
             ConfigModeClient(user, mode, socket);
+            int socketretriev = RetrieveSocket(user);
+            if (socketretriev < 0)
+                return (SendRPL(socket, ERR_NOSUCHNICK(user)));
+            Client users = getUser(socketretriev);
         }
         else {
+            int debut;
             int len = command.find(' ', size) - size;
+            debut = len + 1 + size;
+            if (len < 0)
+                len = command.length() - size;
             std::string channel = command.substr(size, len);
-            std::string mode = command.substr(command.find(' ', size) + 1, command.length());
-            // std::cout << "channel name : [" << channel << "] ||| mode : [" << mode << "]" << std::endl;
+            std::string mode = command.substr(debut, command.length());
+            if (debut == 0)
+                mode = "";
             ConfigMode(channel, mode, socket);
         }
     }
@@ -583,7 +585,6 @@ void    serveur::Names(std::string channel, int socket)
         SendRPL(socket, msg);
     }
 }
-
 
 void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event* events, int i)
 {
@@ -605,26 +606,22 @@ void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event* events, int i)
     }
 }
 
-
-
 void    serveur::ConfigModeClient(std::string &user, std::string &mode, int socket)
 {
     if (mode.size() != 2)
         return ;
     Client userName = getUser(socket);
+    if (mode[1] != 'o' && mode[1] != 'i')
+        return (SendRPL(socket, ERR_NEEDMOREPARAMS(userName.get_user(), "MODE")));
     int newsocket = RetrieveSocket(user);
     if (newsocket == -1)
-        return; // user doesnt existed send RPL user dont existed
+        return ;
     Client newUser = getUser(newsocket);
     std::vector<Client>::iterator it = std::find(this->_client.begin(), this->_client.end(), newUser);
-    if (it != this->_client.end())
-    {
-        if (mode[0] == '-') {
+    if (it != this->_client.end()) {
+        if (mode[0] == '-' && mode[1] == 'o')
             it->SetOperator(0);
-        }
-        else if (mode[1] == '+') {
+        else if (mode[0] == '+' && mode[1] == 'o')
             it->SetOperator(1);
-            // std::string message = RPL_CHANNELMODEIS()
-        }
     }
 }
