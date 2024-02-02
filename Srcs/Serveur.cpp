@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:23:33 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/01 16:38:07 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/02 18:29:48 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -598,7 +598,7 @@ void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event* events, int i)
             if (size == -1)
                 size = string.find('\r', j) - 1;
             command = string.substr(j, (size - j - 1));
-            std::cout << "command : [" << command << "]" << std::endl;
+            // std::cout << "command : [" << command << "]" << std::endl;
             Use(command, events[i].data.fd);
             command = "";
             j = size + 1;
@@ -625,3 +625,13 @@ void    serveur::ConfigModeClient(std::string &user, std::string &mode, int sock
             it->SetOperator(1);
     }
 }
+
+/*
+            COMMENT ENVOYER ET RECEVOIR FICHIER
+
+            - /dcc send <nickname> <filename> filename : nom du fichier
+
+            - /dcc accept connexion etablie grace au dcc maintenant le client doit laccepter puis recoit le fichier ||| sert a rien.
+            
+            - recoit le fichier
+*/
