@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/08 17:06:55 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/01/30 12:34:24 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/05 13:45:15 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 #include "Irc.hpp"
 #include "Client.hpp"
 #include "serveur.hpp"
+#define CRLF "\r\n"
+
 
 class Channel
 {
@@ -64,6 +66,8 @@ class Channel
     std::string          GetTopic() {return this->_topic; };
     std::vector<Client>  get_client() {return this->_list;};
 };
+
+std::string create_header();
 
 
 #endif

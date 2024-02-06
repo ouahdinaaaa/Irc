@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 20:12:14 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/01 20:12:39 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/05 13:36:45 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 #include "server.hpp"
 
 #define MIN_HEIGHT 0
-#define CRLF "\r\n"
 #define ESC 27
 #define BRACKET '['
 #define UP 'A'
@@ -48,6 +47,7 @@
 
 #include <stdint.h>
 
+#define CRLF "\r\n"
 static const std::string logo2 = \
 CRLF \
 "  ██╗██████╗  ██████╗    ███████╗███████╗██████╗ ██╗   ██╗███████╗██████╗"  CRLF \

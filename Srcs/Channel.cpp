@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/09 19:42:15 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/01 12:52:30 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/05 13:46:23 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,6 +142,24 @@ Channel &Channel::operator=(const Channel &other)
     this->_name = other._name;
     this->_Banned = other._Banned;
     this->_list = other._list;
+    this->_mode_i = other._mode_i;
+    this->_mode_t = other._mode_t;
+    this->_mode_k = other._mode_k;
+    this->_mode_o = other._mode_o;
+    this->_mode_l = other._mode_l;
     return (*this);
 }
 
+
+std::string create_header()
+{
+        std::string header = \
+    CRLF \
+    "  ██╗██████╗  ██████╗    ███████╗███████╗██████╗ ██╗   ██╗███████╗██████╗"  CRLF \
+    "  ██║██╔══██╗██╔════╝    ██╔════╝██╔════╝██╔══██╗██║   ██║██╔════╝██╔══██╗" CRLF \
+    "  ██║██████╔╝██║         ███████╗█████╗  ██████╔╝██║   ██║█████╗  ██████╔╝" CRLF \
+    "  ██║██╔══██╗██║         ╚════██║██╔══╝  ██╔══██╗╚██╗ ██╔╝██╔══╝  ██╔══██╗" CRLF \
+    "  ██║██║  ██║╚██████╗    ███████║███████╗██║  ██║ ╚████╔╝ ███████╗██║  ██║" CRLF \
+    "  ╚═╝╚═╝  ╚═╝ ╚═════╝    ╚══════╝╚══════╝╚═╝  ╚═╝  ╚═══╝  ╚══════╝╚═╝  ╚═╝\x1b[0m" CRLF;
+    return header;
+}

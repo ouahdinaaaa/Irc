@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/08 17:36:06 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/01/29 19:46:46 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/05 17:55:35 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,12 @@
 #include <sys/socket.h>
 #include "Numeric_Rpl.hpp"
 
+extern int ctrl_c;
+
 const int MAX_EVENTS = 10;
 
 class Channel;
+
 
 class serveur
 {
@@ -44,17 +47,19 @@ class serveur
         std::vector<Channel> _channel;
         std::vector<Client>  _client;
         int                  _ret;
+        int                  _NickName;
         
         public:
-        serveur() : _channel(), _client(), _ret(1) {};
+        serveur() : _channel(), _client(), _ret(1), _NickName(0) {};
         serveur(char *port, char *mdp);
         ~serveur() {};
         void    JoinCommand(const std::string &channelName, Client userName, int socket, int key);
         int     FirstParam();
         void    PrintTopic();
         void    PartCommand(std::string &channel, int socket, std::string reason);
-        void    Use(std::string command, int socket);
+        void    Use(std::string command, int socket, epoll_event* events, int i, int epollFd);
         Client  getUser(int socket);
+        int     GetNickName() {return this->_NickName; };
         void    ConfigMode(std::string &channel, std::string &mode, int socket);
         void    ConfigModeClient(std::string &user, std::string &mode, int socket);
         int     RetrieveSocketChan(std::string &name, std::string &user);
@@ -68,9 +73,11 @@ class serveur
         void    PrivMsgClient(std::string &name, std::string &message, int socket);
         void    PrivMsg(std::string &channel, std::string &msg, int socket);
         void    Names(std::string channel, int socket);
-        void    retrieve_cmd(int ret, char *buffer, epoll_event* events, int i);
+        void    retrieve_cmd(int ret, char *buffer, epoll_event* events, int i, int epollFd);
         void    PrintClient(Channel &chan);
+        int     UserExist(std::string &name);
 };
+
 
 void    SendRPL(int socket, std::string message);
 

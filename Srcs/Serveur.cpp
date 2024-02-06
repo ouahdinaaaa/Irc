@@ -6,16 +6,28 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:23:33 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/02 18:29:48 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/05 18:02:19 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <iostream>
+#include <csignal>
 #include "../include/serveur.hpp"
 #include "algorithm"
 
+extern int ctrl_c;
+
+void    signal_ctrl_c(int signal)
+{
+    if (signal == SIGINT) {
+        ctrl_c = 1;
+    }
+}
 
 int    serveur::FirstParam()
 {
+    // std::string header = create_header();
+    // std::cout << header << std::endl;
     this->_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (this->_socket == -1)
         return -1;
@@ -68,6 +80,8 @@ void    serveur::JoinCommand(const std::string &channelName, Client userName, in
     Channel Name(channelName);
     std::vector<Channel>::iterator it = std::find(this->_channel.begin(), this->_channel.end(), Name);
     if (it != this->_channel.end()) {
+        // std::cout << "open in here !!" << std::endl;
+        // std::cout << "\n\nget mode i : [" << (it)->Getmode_i() << "]\n\n" << std::endl;
         if (it->Getmode_i() || (it->Getmode_l() && it->Getmode_l() == (int)(it->get_client()).size()) || it->Getmode_k()) 
         {
             if (it->Getmode_i() && !userName.VerifInvitation(channelName) && !userName.GetOperator())
@@ -80,7 +94,6 @@ void    serveur::JoinCommand(const std::string &channelName, Client userName, in
                 std::vector<Client>::iterator its = std::find(this->_client.begin(), this->_client.end(), userName);
                 its->Newlist(channelName);
             }
-            // std::cout << "open in here : " << std::endl;
         }
         Namely = RPL_NAMREPLY(userName.get_user(), channelName, (*it).ListClient());
         std::string EndName = RPL_ENDOFNAMES(userName.get_user(), channelName);
@@ -102,8 +115,8 @@ void    serveur::JoinCommand(const std::string &channelName, Client userName, in
         its->SetImunite();
         Channel NewChan(channelName);
         NewChan.Add(userName);
-        Name = NewChan;
         this->_channel.push_back(NewChan);
+        Name = NewChan;
         Namely = RPL_NAMREPLY(userName.get_user(), channelName, "");
         message = RPL_JOIN(userName.get_user(), userName.get_user(), channelName);
         std::string EndName = RPL_ENDOFNAMES(userName.get_user(), channelName);
@@ -115,22 +128,22 @@ void    serveur::JoinCommand(const std::string &channelName, Client userName, in
     return ; 
 }
 
-void    SendRPL(int socket, std::string message)
-{
+void    SendRPL(int socket, std::string message) {
     ssize_t size =  send(socket, message.c_str(), message.length(), 0);
     if(size == -1)
         std::cout << "You RPL in not good !!!" << std::endl;
 }
 
 
-void setNonBlocking(int sockfd) 
-{
+void setNonBlocking(int sockfd) {
     int flags = fcntl(sockfd, F_GETFL, 0);
     fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
 }
 
+
 void    serveur::connexion(int epollFd)
 {
+    int ctrl_c = 0;
     char buffer[1024];
     epoll_event event;
     int ret;
@@ -138,8 +151,12 @@ void    serveur::connexion(int epollFd)
     epoll_event* events = new epoll_event[MAX_EVENTS];
     event.events = EPOLLIN | EPOLLET; 
     int clientSocket;
+    signal(SIGINT, signal_ctrl_c);
     while (true) 
     {
+        if (ctrl_c == 1)
+        {
+        }
         int numEvents = epoll_wait(epollFd, events, MAX_EVENTS, -1);
         for (int i = 0; i < numEvents; ++i) {
             if (events[i].data.fd == this->_socket)
@@ -158,8 +175,6 @@ void    serveur::connexion(int epollFd)
                 ret = recv(events[i].data.fd, buffer, sizeof(buffer), 0);
                 if (ret == -1)
                 {
-                    // free close break 
-                    std::cout << "test" << std::endl;
                     return ;
                 }
                 else if (ret == 0)
@@ -170,7 +185,7 @@ void    serveur::connexion(int epollFd)
                 }
                 buffer[ret] = '\0';
                 // std::cout << ": cmd is [" << buffer << "]\n" << std::endl;
-                retrieve_cmd(ret, buffer, events, i);
+                retrieve_cmd(ret, buffer, events, i, epollFd);
                 // std::cout << "buffer rec : [" << buffer << "]" << std::endl; 
                 // Lecture ou traitement des données pour les clients connectés
                 // Gérez la réception et l'envoi de données pour chaque socket client
@@ -218,7 +233,7 @@ void    serveur::PrivMsg(std::string &channel, std::string &msg, int socket)
 {
     Channel name(channel);
     std::vector<Channel>::iterator  it = std::find(this->_channel.begin(), this->_channel.end(), name);
-    if (it != this->_channel.end())
+    if (it != this->_channel.end()) 
         PrivChannel(*it, socket, msg);
 }
 
@@ -238,12 +253,10 @@ void    serveur::PrivMsgClient(std::string &name, std::string &message, int sock
     Client user = getUser(socket);
     int newsocket = RetrieveSocket(name);
     std::string msg = RPL_PRIVMSG_CLIENT(user.get_user(), user.get_name(), name, message);
-    if (newsocket == -1)
-    {
-        // std::cout << "Pas de user avec ce name" << std::endl;
-        return ;
+    if (newsocket == -1) {
+        std::string msg = ERR_NOSUCHNICK(name);
+        return (SendRPL(socket, msg));
     }
-    // std::cout << "newsocket : " << newsocket << std::endl;
     SendRPL(newsocket, msg);
 }
 
@@ -418,7 +431,6 @@ void    serveur::Invite(std::string &user, std::string &channel, int socket)
         return(SendRPL(socket, ERR_NOSUCHNICK(name))); //penser a envoyer msg derreur user dosent existed
     if (!_user.GetOperator())
         return (SendRPL(socket, ERR_NOPRIVILEGES(name, channel)));
-    // std::cout << "Get operator : [" << _user.GetOperator() << "]" << std::endl;
     Client UserInvite = getUser(targetsock);
     std::vector<Client>::iterator it = std::find(this->_client.begin(), this->_client.end(), UserInvite);
     it->getInvitation(channel);
@@ -426,10 +438,13 @@ void    serveur::Invite(std::string &user, std::string &channel, int socket)
     SendRPL(targetsock, message);
 }
 
-void    serveur::Use(std::string command, int socket)
+void    serveur::Use(std::string command, int socket, epoll_event *events, int i, int epollFd)
 {
-    std::string newCmd;
+    (void)i;
+    (void)events;
+    (void)epollFd;
     std::string Chan; 
+    std::string newCmd;
 
     std::vector<std::string> spliit;
     int size = command.find(' ');
@@ -438,6 +453,8 @@ void    serveur::Use(std::string command, int socket)
         this->_ret = 1;
     if (newCmd == "NICK" && this->_ret){
         Chan = command.substr(size + 1, command.length());
+        if (UserExist(Chan))
+            return (SendRPL(socket, ERR_NICKNAMEINUSE(Chan)));
         std::string msg = RPL_WELCOME(Chan);
         Client newClient(Chan, socket);
         (*this)._client.push_back(newClient);
@@ -470,6 +487,9 @@ void    serveur::Use(std::string command, int socket)
         JoinCommand(Chan, getUser(socket), socket, key);
     }
     else if (newCmd == "USER") {
+        if (GetNickName()) {
+            this->_NickName = 0;
+            return ; }
         Client user = getUser(socket);
         size_t pos = command.find(' ', size + 1);
         Chan = command.substr(size + 1, pos - (size + 1));
@@ -569,6 +589,10 @@ void    serveur::Use(std::string command, int socket)
             ConfigMode(channel, mode, socket);
         }
     }
+    //creer un bot
+    //Mocupper de la cmd quit
+    //Mocupper du signaux ctrl C
+    //Mocupper du signaux ctrl D
 }
 
 void    serveur::Names(std::string channel, int socket)
@@ -586,7 +610,7 @@ void    serveur::Names(std::string channel, int socket)
     }
 }
 
-void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event* events, int i)
+void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event* events, int i, int epollFd)
 {
     std::string string = buffer;
     std::string command = "";
@@ -598,8 +622,8 @@ void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event* events, int i)
             if (size == -1)
                 size = string.find('\r', j) - 1;
             command = string.substr(j, (size - j - 1));
-            // std::cout << "command : [" << command << "]" << std::endl;
-            Use(command, events[i].data.fd);
+            std::cout << "command : [" << command << "]" << std::endl;
+            Use(command, events[i].data.fd, events, i, epollFd);
             command = "";
             j = size + 1;
         }
@@ -626,6 +650,18 @@ void    serveur::ConfigModeClient(std::string &user, std::string &mode, int sock
     }
 }
 
+int     serveur::UserExist(std::string &name)
+{
+    for (std::vector<Client>::iterator it = this->_client.begin(); it != this->_client.end(); ++it)     {
+        if (name == it->get_user()) {
+            this->_NickName = 1;
+            return 1;
+        }
+    }
+    return 0;
+}
+
+
 /*
             COMMENT ENVOYER ET RECEVOIR FICHIER
 
@@ -634,4 +670,11 @@ void    serveur::ConfigModeClient(std::string &user, std::string &mode, int sock
             - /dcc accept connexion etablie grace au dcc maintenant le client doit laccepter puis recoit le fichier ||| sert a rien.
             
             - recoit le fichier
+
+
+            Faire bot implemeter command bot.
+            Envoie msg aleatoire plus couleur aleatoir
+            verifier Valgrind 
+             
 */
+
