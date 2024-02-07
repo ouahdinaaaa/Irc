@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 17:03:35 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/05 19:40:35 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/06 12:32:08 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ int ctrl_c;
 
 int main(int argc, char **argv)
 {
+    srand(time(NULL));
     if (argc != 3){
         std::cout << "Error of params in you input. Port and mdp !!!" << std::endl;
         return 1;

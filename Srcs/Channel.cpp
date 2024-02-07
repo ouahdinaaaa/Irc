@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/09 19:42:15 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/05 13:46:23 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/06 10:49:40 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,6 @@ void    Channel::choice_mode(std::string mode, Client name, std::string channel,
     int size = mode.find(' ');
     if (mode.length() < 2)
         return ;
-    // std::cout << "size : " << size << "mode : [" << mode << "]" << std::endl;
     int limit = 0;
     std::string argument;
     if (size != -1)
