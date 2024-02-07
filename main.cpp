@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 17:03:35 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/06 12:32:08 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/07 12:03:11 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,10 +38,6 @@ int main(int argc, char **argv)
     serveur prin(argv[1], argv[2]);
 }
 
-
 // ./IrcServ 6668 mdp executable with port | password
-
 // irssi -c localhost -p 6668 -w mdp -n kello // lancer IRssi client qui vas se co a ton serveur
-
-
 

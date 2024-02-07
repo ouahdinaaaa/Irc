@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:23:33 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/07 11:10:45 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/07 19:16:20 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,8 @@ extern int ctrl_c;
 
 int    serveur::FirstParam()
 {
+    signal(SIGINT, signal_ctrl_c);
+    // signal(SIGQUIT, signal_ctrl_ d);
     std::string header = create_header();
     std::cout << header << std::endl;
     this->_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -85,8 +87,7 @@ void    serveur::connexion(int epollFd)
     event.events = EPOLLIN | EPOLLET; 
     int clientSocket;
     CreateBot(epollFd, event);
-    signal(SIGINT, signal_ctrl_c);
-    while (true) 
+    while (true)
     {
         int numEvents = epoll_wait(epollFd, events, MAX_EVENTS, -1);
         if (numEvents == -1){
@@ -290,20 +291,40 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
     //Mocupper du signaux ctrl D
 }
 
+
+// std::vector<std::string>    split(char *buffer)
+// {
+//     std::string command = buffer;
+//     if (command.find('\n') != )
+//         //  on split par rapport
+//     if 
+// }
+
+
 void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_event* events, int i, int epollFd)
 { 
     std::string string = buffer;
     std::string command = "";
     int j = 0;
     int size;
+    int count = -1;
+    std::cout << "buffer recu [" << buffer << "]" << std::endl;
+    if ((int)string.find('\r') == -1) {
+        Use(buffer, events[i].data.fd, event, epollFd);
+    }
     if (ret > 0) {
-        while (j < (int)string.length()) {
+        while (j < (int)string.length() && command.length()) {
             size = string.find('\n', j);
             if (size == -1)
                 size = string.find('\r', j) - 1;
-            command = string.substr(j, (size - j - 1));
+            // std::cout << "len count size : [" << size - j - 1 << "] size command : [" << command.length() << "]" << std::endl;
+            count = size - j - 1;
+            // if (count < 0)
+            //     count = command.length();
+            command = string.substr(j, count);
             std::cout << "command : [" << command << "]" << std::endl;
             Use(command, events[i].data.fd, event, epollFd);
+            std::cout << "exit out" << std::endl;
             command = "";
             j = size + 1;
         }
@@ -324,4 +345,3 @@ void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_ev
             Poour le Kick penser a bien verifier quil detiens bien les proprieter de moderator +o
 
 */
-

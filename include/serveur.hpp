@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/08 17:36:06 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/07 11:02:14 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/07 12:04:28 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,7 @@ class serveur
 };
 
 void    signal_ctrl_c(int signal);
+void    signal_ctrl_d(int signal);
 void    setNonBlocking(int sockfd);
 void    SendRPL(int socket, std::string message);
 

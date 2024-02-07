@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 10:26:47 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/07 10:53:04 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/07 17:58:42 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,15 @@ void    signal_ctrl_c(int signal)
         ctrl_c = 1;
     }
 }
+
+// void    signal_ctrl_d(int signal)
+// {
+//     if (signal == SIGINT) {
+//         return ;
+//     }
+
+// }
+
 
 int     serveur::UserExist(std::string &name)
 {
