@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 10:51:25 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/07 11:04:55 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/08 20:18:25 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ void    serveur::Bot_cmd(int socket)
     std::string color[8] = {GREEN, BLUE, MAGENTA, RED, ROSE, ORANGE, CYAN, EMERAUDE};
 
     int num = rand() % 8;
-    std::string message = color[num] + RPL_PRIVMSG_CLIENT(_bot.get_user(), _bot.get_name(), "Bot", "Continue your evaluation !!!");
+    std::cout << "user : " << _user.get_name() << std::endl;
+    std::string message = color[num] + RPL_PRIVMSG_CLIENT(_bot.get_user(), _user.get_name(), _user.get_user(), "Continue your evaluation !!!");
     SendRPL(socket, message);
 }

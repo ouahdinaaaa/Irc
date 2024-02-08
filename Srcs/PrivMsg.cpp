@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 11:01:26 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/07 11:02:32 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/08 20:20:32 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 void    serveur::PrivMsg(std::string &channel, std::string &msg, int socket)
 {
     Channel name(channel);
-    std::cout << "msg : [" << msg << "]" << std::endl;
+    // std::cout << "msg : [" << msg << "]" << std::endl;
     if (msg == ":Bot" || msg == ":BOT")
         return (Bot_cmd(socket));
     std::vector<Channel>::iterator  it = std::find(this->_channel.begin(), this->_channel.end(), name);
@@ -54,5 +54,5 @@ void    serveur::PrintClient(Channel &chan)
     std::vector<Client> list = chan.get_client();
     for (std::vector<Client>::iterator it = list.begin(); it != list.end(); ++it) {
         std::cout << "name : [" << (*it).get_user() << "]  |||| socket : " << (*it).get_socket() << std::endl;
-    }       
+    }
 }
