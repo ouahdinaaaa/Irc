@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   mounir.cpp                                         :+:      :+:    :+:   */
+/*   Mounir.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 20:12:14 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/05 13:36:45 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/07 19:59:31 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "logger.hpp"
-#include "server.hpp"
+#include "../include/logger.hpp"
+#include "../include/serveur.hpp"
 
 #define MIN_HEIGHT 0
 #define ESC 27

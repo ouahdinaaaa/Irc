@@ -99,7 +99,7 @@
 # define ERR_INVITEONLYCHAN(nickname, chanel) (":localhost 473 " +  nickname + " " + chanel + " :Cannot join channel (+i)\r\n") // used
 
             /* = = =    KICK     = = = */
-#define RPL_KICK(nickname, channel, cible, reason) (':' + nickname + " KICK " + channel + " " + cible + " :" + reason + "\r\n")
+#define RPL_KICK(nickname, channel, cible, reason) (':' + nickname + " KICK #" + channel + " " + cible + " :" + reason + "\r\n")
 #define KICK_CLIENT(nickname, username, cmd, chanel, concerned_client_nickname) ((user_id(nickname, username, cmd)) + chanel + " " + concerned_client_nickname + " :\r\n") // used
             /* = = =    TOPIC     = = = */
 // 331

@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 10:25:03 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/07 11:01:51 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/08 19:25:57 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,8 @@ void    serveur::JoinCommand(const std::string &channelName, Client userName, in
         std::vector<Client>::iterator its = std::find(this->_client.begin(), this->_client.end(), userName);
         its->SetOperator(1);
         its->SetImunite();
+        userName.SetOperator(1);
+        userName.SetImunite();
         Channel NewChan(channelName);
         NewChan.Add(userName);
         this->_channel.push_back(NewChan);
@@ -125,9 +127,10 @@ void    serveur::Invite(std::string &user, std::string &channel, int socket)
 
 void    serveur::KickUser(std::string &channel, std::string &reason, int socket)
 {
-    std::string Chan = channel.substr(1, channel.find(' ') - 1);
+    std::string Chan = channel.substr(0, channel.find(' '));
     Channel name(Chan);
     std::string user = channel.substr(channel.find(' ') + 1, channel.length());
+    std::cout << "name : [" << user << "]  |||| Channel : [" << Chan << "]" << std::endl;
     std::string message;
     int newsocket = RetrieveSocketChan(Chan, user);
     if (newsocket < 0){
@@ -139,9 +142,10 @@ void    serveur::KickUser(std::string &channel, std::string &reason, int socket)
     }
     else
     {
+        // std::cout << "channel : [" << channel << "]" << std::endl;
         Client userKick = getUser(newsocket);
         Client _user = getUser(socket);
-        if (userKick.GetImunite()){
+        if (userKick.GetImunite() || !_user.GetOperator()){
             message = ERR_NOPRIVILEGES(_user.get_user(), channel);
             return (SendRPL(socket, message));
         }

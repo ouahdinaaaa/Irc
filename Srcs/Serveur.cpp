@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:23:33 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/07 19:16:20 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/08 19:30:35 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@ extern int ctrl_c;
 int    serveur::FirstParam()
 {
     signal(SIGINT, signal_ctrl_c);
-    // signal(SIGQUIT, signal_ctrl_ d);
     std::string header = create_header();
     std::cout << header << std::endl;
     this->_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -75,7 +74,6 @@ void setNonBlocking(int sockfd) {
     int flags = fcntl(sockfd, F_GETFL, 0);
     fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
 }
-
 
 void    serveur::connexion(int epollFd)
 {
@@ -174,6 +172,7 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
             keys = command.substr(len + size, command.length());
             key = atoi(keys.c_str());
         }
+        std::cout << "New cmd : [" << Chan << "]" << std::endl;
         JoinCommand(Chan, getUser(socket), socket, key);
     }
     else if (newCmd == "USER") {
@@ -199,7 +198,7 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
             Chan = command.substr(size, command.length());
             PartCommand(channel, socket, Chan);
         }
-        else 
+        else
         {
             size = command.find('#') + 1;
             int len = command.length() - size;
@@ -227,8 +226,8 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
     else if (newCmd == "KICK") 
     {
         size = command.find(':') + 1;
-        int len = size - command.find(' ', 4) - 3;
-        std::string message = command.substr(command.find(' ', 4) + 1, len);
+        int len = command.find(':', command.find('#') + 1) - command.find('#') - 2 ;
+        std::string message = command.substr(command.find('#') + 1, len);
         Chan = command.substr(size, command.length());
         KickUser(message, Chan, socket);
     }
@@ -285,20 +284,11 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
         epoll_ctl(epollFd,  EPOLL_CTL_DEL, socket, &event);
         close(socket);
     }
-    //creer un bot
-    //Mocupper de la cmd quit
-    //Mocupper du signaux ctrl C
-    //Mocupper du signaux ctrl D
+    //creer un bot               [FAIT DOIT ETRE AMELIORER POUR ENVOYER MSG EN PV]
+    //Mocupper de la cmd quit    [FAIT]
+    //Mocupper du signaux ctrl C [FAIT]
+    //Mocupper du signaux ctrl D [FAIT]
 }
-
-
-// std::vector<std::string>    split(char *buffer)
-// {
-//     std::string command = buffer;
-//     if (command.find('\n') != )
-//         //  on split par rapport
-//     if 
-// }
 
 
 void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_event* events, int i, int epollFd)
@@ -308,28 +298,24 @@ void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_ev
     int j = 0;
     int size;
     int count = -1;
-    std::cout << "buffer recu [" << buffer << "]" << std::endl;
-    if ((int)string.find('\r') == -1) {
-        Use(buffer, events[i].data.fd, event, epollFd);
-    }
+    // std::cout << "buffer recu [" << buffer << "] |||| socket : [" << events[i].data.fd << "]" << std::endl;
+    if ((int)string.find('\r') == -1)
+        return (Use(buffer, events[i].data.fd, event, epollFd));
     if (ret > 0) {
-        while (j < (int)string.length() && command.length()) {
+        while (j < (int)string.length()) {
             size = string.find('\n', j);
             if (size == -1)
                 size = string.find('\r', j) - 1;
-            // std::cout << "len count size : [" << size - j - 1 << "] size command : [" << command.length() << "]" << std::endl;
             count = size - j - 1;
-            // if (count < 0)
-            //     count = command.length();
             command = string.substr(j, count);
             std::cout << "command : [" << command << "]" << std::endl;
             Use(command, events[i].data.fd, event, epollFd);
-            std::cout << "exit out" << std::endl;
             command = "";
             j = size + 1;
         }
     }
 }
+
 
 /*
             COMMENT ENVOYER ET RECEVOIR FICHIER
@@ -342,6 +328,6 @@ void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_ev
             Faire bot implemeter command bot.
             Envoie msg aleatoire plus couleur aleatoir
             Pour le Bot changer pour que le msg senvoie en pv
-            Poour le Kick penser a bien verifier quil detiens bien les proprieter de moderator +o
-
+            Poour le Kick penser a bien verifier quil detiens bien les proprieter de moderator +o [FAIT]
+            Rajouter si membre operator a quitter chann doit pouvoit donner les pouvoir au second qui a rejoint
 */

@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/09 19:42:15 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/06 10:49:40 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/08 15:26:32 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,15 +31,22 @@ void    Channel::Add(Client user)
 void    Channel::NewList(Client user)
 {
     std::vector<Client> newlist;
+    int imunite = 0;
     for (std::vector<Client>::iterator it = this->_list.begin(); it != this->_list.end(); ++it)
     {
+        if (user.GetImunite())
+            imunite = 1;       
         if (user.get_user() != (*it).get_user())
             newlist.push_back(*it);
     }
-    this->_list = newlist;
     if (newlist.size() < 1)
         this->_list = std::vector<Client>();
-        
+    else if (imunite) {
+        newlist[0].SetImunite();
+        newlist[0].SetOperator(1);
+        std::cout << newlist[0].get_user() << std::endl;
+    }
+    this->_list = newlist;
 }
 
 void    Channel::choice_mode(std::string mode, Client name, std::string channel, int socket)
