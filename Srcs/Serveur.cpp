@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:23:33 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/08 19:30:35 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/10 19:50:06 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,6 +137,7 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
     std::vector<std::string> spliit;
     int size = command.find(' ');
     newCmd = command.substr(0, size);
+    std::cout << "New cmd : [" << newCmd << "]" << std::endl;
     if (newCmd == "CAP")
         this->_ret = 1;
     if (newCmd == "NICK" && this->_ret){
@@ -278,8 +279,7 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
             ConfigMode(channel, mode, socket);
         }
     }
-    else if (newCmd == "QUIT")
-    {
+    else if (newCmd == "QUIT") {
         Delete(socket);
         epoll_ctl(epollFd,  EPOLL_CTL_DEL, socket, &event);
         close(socket);
@@ -298,22 +298,42 @@ void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_ev
     int j = 0;
     int size;
     int count = -1;
-    // std::cout << "buffer recu [" << buffer << "] |||| socket : [" << events[i].data.fd << "]" << std::endl;
-    if ((int)string.find('\r') == -1)
-        return (Use(buffer, events[i].data.fd, event, epollFd));
-    if (ret > 0) {
-        while (j < (int)string.length()) {
-            size = string.find('\n', j);
+    if (((int)string.find('\n') == -1))
+    {
+        if ((int)string.find('\r') == -1)
+            this->_commands[events[i].data.fd] += string + "\r\n";
+    } 
+    else
+    {
+        if ((int)string.find('\r') == -1)
+        {
+            std::cout << "open in here" << std::endl;
+            this->_commands[events[i].data.fd] += string;
+        }
+        else
+            this->_commands[events[i].data.fd] += string;
+    }
+    /*
+        Good maintenant rajouter fonction qui va clear le buffer en mettant seuleument 1 seule espace entre chaque Mot verifie quan manque argument
+    */
+    std::cout << "Buffer : [" << buffer << "]" << std::endl;
+    std::cout << "\n--------------- Buffer this->cmd : [" << this->_commands[events[i].data.fd] << "]   |||| socket : [" << events[i].data.fd << "]-----------------------\n" << std::endl;
+    if ((int)string.find('\n') == -1)
+        return ;
+    if (ret > 0 && this->_commands[events[i].data.fd].find('\n')) {
+        while (j < (int)this->_commands[events[i].data.fd].length()) {
+            size = this->_commands[events[i].data.fd].find('\n', j);
             if (size == -1)
-                size = string.find('\r', j) - 1;
+                size = this->_commands[events[i].data.fd].find('\r', j) - 1;
             count = size - j - 1;
-            command = string.substr(j, count);
+            command = this->_commands[events[i].data.fd].substr(j, count);
             std::cout << "command : [" << command << "]" << std::endl;
             Use(command, events[i].data.fd, event, epollFd);
             command = "";
             j = size + 1;
         }
     }
+    this->_commands[events[i].data.fd] = "";
 }
 
 

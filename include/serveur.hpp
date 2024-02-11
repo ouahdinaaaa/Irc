@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/08 17:36:06 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/07 12:04:28 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/09 12:39:19 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,17 +55,18 @@ class Channel;
 class serveur
 {
     private:
-        int                  _socket;
-        std::string          _mdp;
-        std::string          _mdprecu;
-        int                  _port;
-        std::vector<Channel> _channel;
-        std::vector<Client>  _client;
-        int                  _ret;
-        int                  _NickName;
+        int                             _socket;
+        std::string                     _mdp;
+        std::string                     _mdprecu;
+        int                             _port;
+        std::vector<Channel>            _channel;
+        std::vector<Client>             _client;
+        int                             _ret;
+        int                             _NickName;
+        std::map<int, std::string>      _commands;
         
         public:
-        serveur() : _channel(), _client(), _ret(1), _NickName(0) {};
+        serveur() : _channel(), _client(), _ret(1), _NickName(0), _commands() {};
         serveur(char *port, char *mdp);
         ~serveur() {};
         void    JoinCommand(const std::string &channelName, Client userName, int socket, int key);
@@ -88,13 +89,13 @@ class serveur
         void    PrivMsgClient(std::string &name, std::string &message, int socket);
         void    PrivMsg(std::string &channel, std::string &msg, int socket);
         void    Names(std::string channel, int socket);
-        void    retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_event* events, int i, int epollFd);
-        void    PrintClient(Channel &chan);
         int     UserExist(std::string &name);
+        void    PrintClient(Channel &chan);
         void    Delete(int socket);
-        void    CreateBot(int epollFd, epoll_event event);
         void    Bot_cmd(int socket);
+        void    CreateBot(int epollFd, epoll_event event);
         void    EveryDelete(int epollFd, epoll_event *events, epoll_event event);
+        void    retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_event* events, int i, int epollFd);
 };
 
 void    signal_ctrl_c(int signal);

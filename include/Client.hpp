@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/08 16:42:46 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/01/30 19:59:26 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/10 16:05:30 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,11 +29,12 @@ class Client
 
     public:
     Client(const std::string &name, int socket) : _user(name), _socketFd(socket), _operator(0), _imunite(0), _Invitation() {};
+     Client(const std::string &name, std::string user, int socket) : _user(name), _name(user),_socketFd(socket), _operator(0), _imunite(0), _Invitation() {};
     Client(const std::string &name, int socket, int imunite) : _user(name), _socketFd(socket), _operator(0), _imunite(imunite), _Invitation() {};
     ~Client() {};
-
+    
     // gerer le client
-
+    
     std::string     get_user() { return (*this)._user; };
     std::string     get_name() { return this->_name; };
     void            getInvitation(std::string &channel);
