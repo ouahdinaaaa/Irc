@@ -43,10 +43,6 @@
 // 433
 # define ERR_NICKNAMEINUSE(nickname) (":localhost 433 * " + nickname + " :Nickname is already in use\r\n")//used
 
-            /* = = =    GENERIC ERR     = = = */
-// 461
-# define ERR_NEEDMOREPARAMS(nickname, cmd) (":localhost 461 " + nickname + " " + cmd + " :Not enough parameters\r\n") // used
-
             /* = = =    PING / PONG     = = = */
 
 # define RPL_PONG ":localhost PONG localhost :localhost\r\n" // used
@@ -122,6 +118,9 @@
 #define RPL_TOPIC(nickname, channel, topic) (std::string(":") + SERVER_NAME + " 332 " + nickname + " #" + channel + " :" + topic + "\r\n")
 
 #define PART(nickname, username, channel, message) (CLIENT_ID(nickname, username, "PART") + "#" + channel + " :" + message + "\r\n")
+#define ERR_UNKNOWNCOMMAND(nickname, command) (std::string(":") + SERVER_NAME + " 421 " + nickname + " " + command + " :Unknown command"+ "\r\n")
+
+#define ERR_NEEDMOREPARAMS(nickname, command) (std::string(":") + SERVER_NAME + " 461 " + nickname + " " + command + " :Not enough parameters\r\n")
 
 #define ROL_TOPICWHOTIME(nickname, channel, concerned_client_nickname, time) (std::string(":") + SERVER_NAME + " 333 " + nickname + " " + channel + " " + concerned_client_nickname + " " + time + "\r\n")
 // #define CLIENT_ID(nickname, username, command) (":" + nickname + "!~" + username + "@" + chanel + " " + command + " ")

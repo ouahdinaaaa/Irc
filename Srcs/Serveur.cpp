@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:23:33 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/10 19:50:06 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/11 16:54:19 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ int    serveur::FirstParam()
     return 0;
 }
 
-serveur::serveur(char *port, char *mdp) : _mdp(mdp), _port(atoi(port)), _channel(), _client(), _ret(0), _NickName(0)
+serveur::serveur(char *port, char *mdp) :_mdp(mdp), _mdpPort(), _port(atoi(port)), _channel(), _client(), _ret(), _NickName(0), _commands()
 {
     FirstParam();
 }
@@ -136,27 +136,31 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
 
     std::vector<std::string> spliit;
     int size = command.find(' ');
+    int len_size;
     newCmd = command.substr(0, size);
     std::cout << "New cmd : [" << newCmd << "]" << std::endl;
-    if (newCmd == "CAP")
-        this->_ret = 1;
-    if (newCmd == "NICK" && this->_ret){
+    if (newCmd == "CAP") {
+        this->_ret[socket] = 1;
+        return ;
+    }
+    else if (newCmd == "NICK" && this->_ret[socket]){
         Chan = command.substr(size + 1, command.length());
         if (UserExist(Chan))
             return (SendRPL(socket, ERR_NICKNAMEINUSE(Chan)));
         std::string msg = RPL_WELCOME(Chan);
+        if (this->_mdp != this->_mdpPort[socket])
+            msg = ERR_PASSWDMISMATCH(Chan);
         Client newClient(Chan, socket);
         (*this)._client.push_back(newClient);
-        this->_ret = 0;
-        if (_mdp != _mdprecu)
-            msg = ERR_PASSWDMISMATCH(Chan);
-        SendRPL(socket, msg);
+        this->_ret[socket] = 0;
+        return(SendRPL(socket, msg));
     }
     else if (newCmd == "PING")
-        SendRPL(socket, RPL_PONG);
+        return(SendRPL(socket, RPL_PONG));
     else if (newCmd == "PASS"){
         Chan = command.substr(size + 1, command.length());
-        this->_mdprecu = Chan;
+        this->_mdpPort[socket] = Chan;
+        return ;
     }
     else if (newCmd == "JOIN"){
         size = command.find('#') + 1;
@@ -175,6 +179,7 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
         }
         std::cout << "New cmd : [" << Chan << "]" << std::endl;
         JoinCommand(Chan, getUser(socket), socket, key);
+        return ;
     }
     else if (newCmd == "USER") {
         if (GetNickName()) {
@@ -189,6 +194,7 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
             this->_client.erase(it);
             this->_client.push_back(user);
         }
+        return ;
     }
     else if (newCmd == "PART") 
     {
@@ -206,8 +212,9 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
             std::string channels = command.substr(size, len);
             PartCommand(channels, socket, "Good Bye");
         }
+        return ;
     }
-    int len_size = command.find('#');
+    len_size = command.find('#');
     if (newCmd == "PRIVMSG" && len_size != -1)
     {
         size = command.find(':');
@@ -215,6 +222,7 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
         std::string Channel = command.substr((command.find('#') + 1), len);
         Chan = command.substr(size, command.length());
         PrivMsg(Channel, Chan, socket);
+        return ;
     }
     else if (newCmd == "PRIVMSG" && len_size == -1)
     {
@@ -223,6 +231,7 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
         std::string message = command.substr((command.find(' ', 7) + 1) , len);
         Chan = command.substr(size, command.length());
         PrivMsgClient(message, Chan, socket);
+        return ;
     }
     else if (newCmd == "KICK") 
     {
@@ -231,6 +240,7 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
         std::string message = command.substr(command.find('#') + 1, len);
         Chan = command.substr(size, command.length());
         KickUser(message, Chan, socket);
+        return ;
     }
     else if (newCmd == "INVITE")
     {
@@ -239,6 +249,7 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
         std::string user = command.substr(command.find(' ', 6) + 1, len);
         Chan = command.substr(size, command.length());
         Invite(user, Chan, socket);
+        return ;
     }
     else if (newCmd == "TOPIC"){
         size = command.find('#') + 1;
@@ -246,14 +257,16 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
         std::string channel = command.substr(size, len);
         std::string topic = command.substr(command.find(':') + 1, command.length());
         Topic(channel, topic, socket);
+        return ;
     }
     else if (newCmd == "NAMES")
     {
         size = command.find('#') + 1;
         std::string channel = command.substr(size, command.length());
         Names(channel, socket);
+        return ;
     }
-    if (newCmd == "MODE")
+    else if (newCmd == "MODE")
     {
         size = command.find('#') + 1;
         if (!size) {
@@ -278,28 +291,38 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
                 mode = "";
             ConfigMode(channel, mode, socket);
         }
+        return ;
     }
     else if (newCmd == "QUIT") {
         Delete(socket);
         epoll_ctl(epollFd,  EPOLL_CTL_DEL, socket, &event);
         close(socket);
+        return ;
     }
+    else 
+    {
+        // std::cout << "open in here" << std::endl;
+        Client _user = getUser(socket);
+        std::string msg = ERR_UNKNOWNCOMMAND(_user.get_user(), newCmd);
+        SendRPL(socket, msg);
+    }
+}
+
+    
     //creer un bot               [FAIT DOIT ETRE AMELIORER POUR ENVOYER MSG EN PV]
     //Mocupper de la cmd quit    [FAIT]
     //Mocupper du signaux ctrl C [FAIT]
     //Mocupper du signaux ctrl D [FAIT]
-}
-
 
 void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_event* events, int i, int epollFd)
 { 
     std::string string = buffer;
+    std::string string2 = buffer;
     std::string command = "";
     int j = 0;
     int size;
     int count = -1;
-    if (((int)string.find('\n') == -1))
-    {
+    if (((int)string.find('\n') == -1)) {
         if ((int)string.find('\r') == -1)
             this->_commands[events[i].data.fd] += string + "\r\n";
     } 
@@ -307,18 +330,13 @@ void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_ev
     {
         if ((int)string.find('\r') == -1)
         {
-            std::cout << "open in here" << std::endl;
-            this->_commands[events[i].data.fd] += string;
+            std::string s2 = string.substr(0, string.length() - 1);
+            this->_commands[events[i].data.fd] += s2 + "\r\n";
         }
         else
             this->_commands[events[i].data.fd] += string;
     }
-    /*
-        Good maintenant rajouter fonction qui va clear le buffer en mettant seuleument 1 seule espace entre chaque Mot verifie quan manque argument
-    */
-    std::cout << "Buffer : [" << buffer << "]" << std::endl;
-    std::cout << "\n--------------- Buffer this->cmd : [" << this->_commands[events[i].data.fd] << "]   |||| socket : [" << events[i].data.fd << "]-----------------------\n" << std::endl;
-    if ((int)string.find('\n') == -1)
+    if ((int)string2.find('\n') == -1)
         return ;
     if (ret > 0 && this->_commands[events[i].data.fd].find('\n')) {
         while (j < (int)this->_commands[events[i].data.fd].length()) {
@@ -337,6 +355,7 @@ void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_ev
 }
 
 
+
 /*
             COMMENT ENVOYER ET RECEVOIR FICHIER
 
@@ -345,9 +364,12 @@ void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_ev
             - recoit le fichier
 
             verifier Valgrind
+            Verifier Valgrind leak
             Faire bot implemeter command bot.
             Envoie msg aleatoire plus couleur aleatoir
             Pour le Bot changer pour que le msg senvoie en pv
+            nc tout est regler juste regles par rapport au port et faire test avec multitude de nc
             Poour le Kick penser a bien verifier quil detiens bien les proprieter de moderator +o [FAIT]
             Rajouter si membre operator a quitter chann doit pouvoit donner les pouvoir au second qui a rejoint
+
 */

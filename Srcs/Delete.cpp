@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 10:52:30 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/07 10:52:48 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/11 15:14:54 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@ void    serveur::Delete(int socket)
     for (std::vector<Channel>::iterator it = this->_channel.begin(); it != this->_channel.end(); ++it) {
         it->NewList(_user);
     }
-    
     std::vector<Client> Newlist;
     for (std::vector<Client>::iterator its = this->_client.begin(); its != this->_client.end(); ++its)
     {
@@ -43,11 +42,5 @@ void    serveur::EveryDelete(int epollFd, epoll_event *events, epoll_event event
         close(epollFd);
         close(this->_socket);
     }
-        // delete []events;
-        // close(this->_port);
-        // std::cout << "" <<std::endl;
-        // close(this->_socket);
-        // close(epollFd);
-        // exit (1);
 }
 
