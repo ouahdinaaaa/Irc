@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/08 17:36:06 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/11 16:41:52 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/12 17:08:03 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sstream>
 #include "Numeric_Rpl.hpp"
 
 # define BLACK "\033[30m"
@@ -89,6 +90,7 @@ class serveur
         void    PrivMsg(std::string &channel, std::string &msg, int socket);
         void    Names(std::string channel, int socket);
         int     UserExist(std::string &name);
+        int     ValidUser(int socket);
         void    PrintClient(Channel &chan);
         void    Delete(int socket);
         void    Bot_cmd(int socket);
@@ -100,6 +102,7 @@ class serveur
 void    signal_ctrl_c(int signal);
 void    setNonBlocking(int sockfd);
 void    SendRPL(int socket, std::string message);
+std::string    splitString(std::string &line);
 
 
 #endif

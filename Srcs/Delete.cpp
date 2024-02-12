@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 10:52:30 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/11 15:14:54 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/12 13:36:21 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,5 +42,6 @@ void    serveur::EveryDelete(int epollFd, epoll_event *events, epoll_event event
         close(epollFd);
         close(this->_socket);
     }
+    
 }
 

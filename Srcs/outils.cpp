@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 10:26:47 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/07 17:58:42 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/12 19:04:43 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,6 @@ Client serveur::getUser(int socket)
         if ((*it).get_socket() == socket)
             return *it;
     }
-    it = this->_client.end();
     return *it;
 }
 
@@ -56,13 +55,35 @@ void    signal_ctrl_c(int signal)
     }
 }
 
-// void    signal_ctrl_d(int signal)
-// {
-//     if (signal == SIGINT) {
-//         return ;
-//     }
 
-// }
+std::string splitString(std::string &line) 
+{
+    std::istringstream iss(line);
+    std::vector<std::string> words;
+    std::string word;
+    std::string str;
+
+    while (iss >> word) {
+        words.push_back(word);
+    }
+    for (int i = 0; i < (int)words.size(); i++) {
+        if (i + 1 == (int)words.size())
+            str += words[i] + '\n';
+        else
+            str += words[i] + " ";
+    }
+    return str;
+}
+
+int serveur::ValidUser(int socket)
+{
+    std::vector<Client>::iterator it;
+    for (std::vector<Client>::iterator it = this->_client.begin(); it != this->_client.end(); ++it) {
+        if ((*it).get_socket() == socket)
+            return 1;
+    }
+    return 0;
+}
 
 
 int     serveur::UserExist(std::string &name)
@@ -75,3 +96,4 @@ int     serveur::UserExist(std::string &name)
     }
     return 0;
 }
+
