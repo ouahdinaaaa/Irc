@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 10:25:03 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/08 19:25:57 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/15 19:48:54 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,6 @@ void    serveur::JoinCommand(const std::string &channelName, Client userName, in
 
 void    serveur::PartCommand(std::string &channel, int socket, std::string reason) 
 {
-    (void)reason;
     std::string nameChannel = channel;
     Channel name(channel);
     Client  user = getUser(socket);
@@ -130,7 +129,7 @@ void    serveur::KickUser(std::string &channel, std::string &reason, int socket)
     std::string Chan = channel.substr(0, channel.find(' '));
     Channel name(Chan);
     std::string user = channel.substr(channel.find(' ') + 1, channel.length());
-    std::cout << "name : [" << user << "]  |||| Channel : [" << Chan << "]" << std::endl;
+    // std::cout << "name : [" << user << "]  |||| Channel : [" << Chan << "]" << std::endl;
     std::string message;
     int newsocket = RetrieveSocketChan(Chan, user);
     if (newsocket < 0){
@@ -142,7 +141,6 @@ void    serveur::KickUser(std::string &channel, std::string &reason, int socket)
     }
     else
     {
-        // std::cout << "channel : [" << channel << "]" << std::endl;
         Client userKick = getUser(newsocket);
         Client _user = getUser(socket);
         if (userKick.GetImunite() || !_user.GetOperator()){
@@ -153,8 +151,7 @@ void    serveur::KickUser(std::string &channel, std::string &reason, int socket)
         std::vector<Channel>::iterator it = std::find(this->_channel.begin(), this->_channel.end(), name);
         std::vector<Client> list = (*it).get_client();
         std::vector<Client>::iterator its = std::find(list.begin(), list.end(), userKick);
-        if (it != this->_channel.end() && its != list.end()) 
-        {
+        if (it != this->_channel.end() && its != list.end()) {
             SendRPL(newsocket, message);
             it->NewList(*its);
         }

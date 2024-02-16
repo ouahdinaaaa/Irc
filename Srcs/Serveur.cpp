@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:23:33 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/12 19:10:10 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/02/13 10:27:22 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -317,6 +317,12 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
     //Mocupper de la cmd quit    [FAIT]
     //Mocupper du signaux ctrl C [FAIT]
     //Mocupper du signaux ctrl D [FAIT]
+    
+/*
+            MODIF A FAIRE
+    - Changer le kick msg nas pas les priorite
+    - changer quand on fais la connexion penser a envoyer le RPL apres USER et non APRES NICK
+*/
 
 /*
     iss fonction retire espace ||| [Fait parsing de nc]
