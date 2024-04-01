@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:23:33 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/13 10:27:22 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/03/03 19:18:05 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -304,55 +304,96 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
     }
     else 
     {
-        if (!ValidUser(socket) || newCmd.length() == 0)
+        if (!ValidUser(socket))
             return ;
         Client _user = getUser(socket);
         std::string msg = ERR_UNKNOWNCOMMAND(_user.get_user(), newCmd);
         SendRPL(socket, msg);
     }
 }
-
-    
+   
     //creer un bot               [FAIT DOIT ETRE AMELIORER POUR ENVOYER MSG EN PV]
     //Mocupper de la cmd quit    [FAIT]
     //Mocupper du signaux ctrl C [FAIT]
     //Mocupper du signaux ctrl D [FAIT]
-    
-/*
-            MODIF A FAIRE
-    - Changer le kick msg nas pas les priorite
-    - changer quand on fais la connexion penser a envoyer le RPL apres USER et non APRES NICK
-*/
 
 /*
-    iss fonction retire espace ||| [Fait parsing de nc]
+    iss fonction retire espace
 */
+
+// void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_event* events, int i, int epollFd)
+// {
+//     std::string str = buffer;
+//     std::string string = splitString(str);
+//     std::string string2 = splitString(str);
+//     std::cout << "str : [" << str << "]" << std::endl;
+//     std::string command = "";
+//     int j = 0;
+//     int size;
+//     int count = -1;
+//     if (((int)string.find('\n') == -1)) {
+//         if ((int)string.find('\r') == -1)
+//             this->_commands[events[i].data.fd] += string + "\r\n";
+//     }
+//     else
+//     {
+//         if ((int)string.find('\r') == -1)
+//         {
+//             std::cout << "open2.1\n"  << std::endl;
+//             std::string s2 = string.substr(0, string.length() - 1);
+//             this->_commands[events[i].data.fd] += s2 + "\r\n";
+//         }
+//         else
+//             this->_commands[events[i].data.fd] += string;
+//     }
+//     if ((int)string2.find('\n') == -1)
+//         return ;
+//     if (ret > 0 && this->_commands[events[i].data.fd].find('\n')) 
+//     {
+//         while (j < (int)this->_commands[events[i].data.fd].length()) 
+//         {
+//             size = this->_commands[events[i].data.fd].find('\n', j);
+//             if (size == -1)
+//                 size = this->_commands[events[i].data.fd].find('\r', j) - 1;
+//             count = size - j - 1;
+//             command = this->_commands[events[i].data.fd].substr(j, count);
+//             std::cout << "command : [" << command << "]" << std::endl;
+//             Use(command, events[i].data.fd, event, epollFd);
+//             command = "";
+//             j = size + 1;
+//         }
+//     }
+//     this->_commands[events[i].data.fd] = "";
+// }
+
 
 void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_event* events, int i, int epollFd)
-{
-    std::string str = buffer;
-    std::string string = splitString(str);
-    std::string string2 = splitString(str);
-    // std::cout << "String Split : [" << string << "]" << std::endl;
+{ 
+    std::string string = buffer;
     std::string command = "";
     int j = 0;
     int size;
     int count = -1;
-    if (((int)str.find('\n') == -1)) {
-        if ((int)str.find('\r') == -1)
+    std::cout << "... STRING : [" << string << "]" << std::endl;
+    if (((int)string.find('\n') == -1))
+    {
+        if ((int)string.find('\r') == -1)
             this->_commands[events[i].data.fd] += string + "\r\n";
     } 
     else
     {
-        if ((int)str.find('\r') == -1)
+        if ((int)string.find('\r') == -1)
         {
-            std::string s2 = string.substr(0, string.length() - 1);
-            this->_commands[events[i].data.fd] += s2 + "\r\n";
+            this->_commands[events[i].data.fd] += string;
         }
         else
-            this->_commands[events[i].data.fd] += string;
+            this->_commands[events[i].data.fd] += string + "\r\n";
     }
-    if ((int)str.find('\n') == -1)
+    // if ()
+    /*
+        Good maintenant rajouter fonction qui va clear le buffer en mettant seuleument 1 seule espace entre chaque Mot verifie quan manque argument
+    */
+    if ((int)string.find('\n') == -1 || string.length() < 2)
         return ;
     if (ret > 0 && this->_commands[events[i].data.fd].find('\n')) {
         while (j < (int)this->_commands[events[i].data.fd].length()) {
@@ -362,14 +403,15 @@ void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_ev
             count = size - j - 1;
             command = this->_commands[events[i].data.fd].substr(j, count);
             std::cout << "command : [" << command << "]" << std::endl;
-            Use(command, events[i].data.fd, event, epollFd);
+            // std::cout << "size of : [" << command.length() << "]" << std::endl;
+            if (command.length() > 2)
+                Use(command, events[i].data.fd, event, epollFd);
             command = "";
             j = size + 1;
         }
     }
     this->_commands[events[i].data.fd] = "";
 }
-
 
 
 /*
@@ -379,13 +421,13 @@ void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_ev
             - /dcc accept connexion etablie grace au dcc maintenant le client doit laccepter puis recoit le fichier ||| sert a rien.
             - recoit le fichier
 
-            verifier Valgrind      [Fait]
-            Verifier Valgrind leak [Fait]
-            Faire bot implemeter command bot. [Fait]
-            Envoie msg aleatoire plus couleur aleatoir [Fait]
-            Pour le Bot changer pour que le msg senvoie en pv []
-            nc tout est regler juste regles par rapport au port et faire test avec multitude de nc [Fait]
+            verifier Valgrind
+            Verifier Valgrind leak
+            Faire bot implemeter command bot.
+            Envoie msg aleatoire plus couleur aleatoir
+            Pour le Bot changer pour que le msg senvoie en pv
+            nc tout est regler juste regles par rapport au port et faire test avec multitude de nc
             Poour le Kick penser a bien verifier quil detiens bien les proprieter de moderator +o [FAIT]
-            Rajouter si membre operator a quitter chann doit pouvoit donner les pouvoir au second qui a rejoint [Rajouter]
+            Rajouter si membre operator a quitter chann doit pouvoit donner les pouvoir au second qui a rejoint
 
 */
