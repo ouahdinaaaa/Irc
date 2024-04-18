@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:23:33 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/03/03 19:18:05 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/04/17 20:26:17 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,8 @@ extern int ctrl_c;
 int    serveur::FirstParam()
 {
     signal(SIGINT, signal_ctrl_c);
-    std::string header = create_header();
-    std::cout << header << std::endl;
+    // std::string header = create_header();
+    // std::cout << header << std::endl;
     this->_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (this->_socket == -1)
         return -1;
@@ -283,6 +283,11 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
             Client users = getUser(socketretriev);
         }
         else {
+            // Envoie msg aleatoire plus couleur aleatoir
+            // Pour le Bot changer pour que le msg senvoie en pv
+            // nc tout est regler juste regles par rapport au port et faire test avec multitude de nc
+            // Poour le Kick penser a bien verifier quil detiens bien les proprieter de moderator +o [FAIT]
+            // Rajouter si membre operator a quitter chann
             int debut;
             int len = command.find(' ', size) - size;
             debut = len + 1 + size;
@@ -319,7 +324,7 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
 
 /*
     iss fonction retire espace
-*/
+// */
 
 // void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_event* events, int i, int epollFd)
 // {
