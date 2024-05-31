@@ -24,16 +24,18 @@ void    serveur::CreateBot(int epollFd, epoll_event event)
     this->_client.push_back(_user);
 }
 
-void    serveur::Bot_cmd(int socket)
+void serveur::Bot_cmd(int socket)
 {
     Client _bot = getUser(1);
     Client _user = getUser(socket);
 
     std::string color[8] = {GREEN, BLUE, MAGENTA, RED, ROSE, ORANGE, CYAN, EMERAUDE};
-
+    std::string msgs[6] = {"A GREAT TEAM", "WAOUUUW", "AMAAAAZIIINNG !!!", "TRooop hlouuuu ❤️", "FINISH THIS EVALUTAION", "GOO GOO GOO ITS TIME"};
     int num = rand() % 8;
+    int num2 = rand() % 6;
+    
     std::cout << "user : " << _user.get_name() << std::endl;
-    std::string message = color[num] + RPL_PRIVMSG_CLIENT(_bot.get_user(), _bot.get_name(), _user.get_user(), "Continue your evaluation !!!");
-    std::cout << "message : [" << message << "]" << std::endl;
-    SendRPL(socket, message);
+    std::string message = color[num] + msgs[num2] + RESET;
+    std::string privmsg = ":" + _bot.get_user() + " PRIVMSG " + _user.get_user() + " :" + message + "\r\n";
+    SendRPL(socket, privmsg);
 }

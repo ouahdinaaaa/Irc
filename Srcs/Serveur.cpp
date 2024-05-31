@@ -173,6 +173,8 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
         else {
             len = command.length() - size - 3;
             Chan = command.substr(size, len);
+            std::istringstream  iss(Chan);
+            iss >> Chan;
         }   
         if ((int)command.find(' ', size) != -1) {
             keys = command.substr(len + size, command.length());
@@ -283,11 +285,6 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
             Client users = getUser(socketretriev);
         }
         else {
-            // Envoie msg aleatoire plus couleur aleatoir
-            // Pour le Bot changer pour que le msg senvoie en pv
-            // nc tout est regler juste regles par rapport au port et faire test avec multitude de nc
-            // Poour le Kick penser a bien verifier quil detiens bien les proprieter de moderator +o [FAIT]
-            // Rajouter si membre operator a quitter chann
             int debut;
             int len = command.find(' ', size) - size;
             debut = len + 1 + size;
@@ -322,55 +319,6 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
     //Mocupper du signaux ctrl C [FAIT]
     //Mocupper du signaux ctrl D [FAIT]
 
-/*
-    iss fonction retire espace
-// */
-
-// void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_event* events, int i, int epollFd)
-// {
-//     std::string str = buffer;
-//     std::string string = splitString(str);
-//     std::string string2 = splitString(str);
-//     std::cout << "str : [" << str << "]" << std::endl;
-//     std::string command = "";
-//     int j = 0;
-//     int size;
-//     int count = -1;
-//     if (((int)string.find('\n') == -1)) {
-//         if ((int)string.find('\r') == -1)
-//             this->_commands[events[i].data.fd] += string + "\r\n";
-//     }
-//     else
-//     {
-//         if ((int)string.find('\r') == -1)
-//         {
-//             std::cout << "open2.1\n"  << std::endl;
-//             std::string s2 = string.substr(0, string.length() - 1);
-//             this->_commands[events[i].data.fd] += s2 + "\r\n";
-//         }
-//         else
-//             this->_commands[events[i].data.fd] += string;
-//     }
-//     if ((int)string2.find('\n') == -1)
-//         return ;
-//     if (ret > 0 && this->_commands[events[i].data.fd].find('\n')) 
-//     {
-//         while (j < (int)this->_commands[events[i].data.fd].length()) 
-//         {
-//             size = this->_commands[events[i].data.fd].find('\n', j);
-//             if (size == -1)
-//                 size = this->_commands[events[i].data.fd].find('\r', j) - 1;
-//             count = size - j - 1;
-//             command = this->_commands[events[i].data.fd].substr(j, count);
-//             std::cout << "command : [" << command << "]" << std::endl;
-//             Use(command, events[i].data.fd, event, epollFd);
-//             command = "";
-//             j = size + 1;
-//         }
-//     }
-//     this->_commands[events[i].data.fd] = "";
-// }
-
 
 void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_event* events, int i, int epollFd)
 { 
@@ -384,20 +332,21 @@ void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_ev
     {
         if ((int)string.find('\r') == -1)
             this->_commands[events[i].data.fd] += string + "\r\n";
+
     } 
     else
     {
         if ((int)string.find('\r') == -1)
         {
-            this->_commands[events[i].data.fd] += string;
+            // std::cout << "open1" << std::endl;
+            this->_commands[events[i].data.fd] += string.substr(0, string.length() - 1) + "\r\n";
         }
         else
+        {
+            // std::cout << "open2" << std::endl;
             this->_commands[events[i].data.fd] += string + "\r\n";
+        }
     }
-    // if ()
-    /*
-        Good maintenant rajouter fonction qui va clear le buffer en mettant seuleument 1 seule espace entre chaque Mot verifie quan manque argument
-    */
     if ((int)string.find('\n') == -1 || string.length() < 2)
         return ;
     if (ret > 0 && this->_commands[events[i].data.fd].find('\n')) {
@@ -405,10 +354,10 @@ void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_ev
             size = this->_commands[events[i].data.fd].find('\n', j);
             if (size == -1)
                 size = this->_commands[events[i].data.fd].find('\r', j) - 1;
+            std::cout << "size : " << size << std::endl;
             count = size - j - 1;
             command = this->_commands[events[i].data.fd].substr(j, count);
             std::cout << "command : [" << command << "]" << std::endl;
-            // std::cout << "size of : [" << command.length() << "]" << std::endl;
             if (command.length() > 2)
                 Use(command, events[i].data.fd, event, epollFd);
             command = "";
@@ -425,14 +374,17 @@ void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_ev
             - /dcc send <nickname> <filename> filename : nom du fichier
             - /dcc accept connexion etablie grace au dcc maintenant le client doit laccepter puis recoit le fichier ||| sert a rien.
             - recoit le fichier
+            -Parsing avec nc a regler [FAIT]
+            - Envoyer info dans l'odre sinon marche pas[veriier cette info]
 
             verifier Valgrind
             Verifier Valgrind leak
             Faire bot implemeter command bot.
-            Envoie msg aleatoire plus couleur aleatoir
-            Pour le Bot changer pour que le msg senvoie en pv
-            nc tout est regler juste regles par rapport au port et faire test avec multitude de nc
+            Envoie msg aleatoire plus couleur aleatoir [Fait]
+            Pour le Bot changer pour que le msg senvoie en pv [Fait]
+            nc tout est regler juste regles par rapport au port et faire test avec multitude de nc [faire test multi nc]
             Poour le Kick penser a bien verifier quil detiens bien les proprieter de moderator +o [FAIT]
-            Rajouter si membre operator a quitter chann doit pouvoit donner les pouvoir au second qui a rejoint
+            Rajouter si membre operator a quitter chann doit pouvoit donner les pouvoir au second qui a rejoint [rajouter]
+            Envoyer message a tout le monde quand quitte channels.[Fait]
 
 */
