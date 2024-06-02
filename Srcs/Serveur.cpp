@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:23:33 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/06/01 17:56:01 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/02 19:16:43 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ int    serveur::FirstParam()
         return -1;
     }
     epoll_event event;
-    event.events = EPOLLIN | EPOLLET; // Événements à surveiller (lecture et mode Edge Triggered)
+    event.events = EPOLLIN; // Événements à surveiller (lecture et mode Edge Triggered)
     event.data.fd = this->_socket;
 
     if (epoll_ctl(epollFd, EPOLL_CTL_ADD, this->_socket, &event) == -1) {
@@ -82,7 +82,7 @@ void    serveur::connexion(int epollFd)
     int ret;
     std::vector<int> welcomeSocket;
     epoll_event* events = new epoll_event[MAX_EVENTS];
-    event.events = EPOLLIN | EPOLLET; 
+    event.events = EPOLLIN; 
     int clientSocket;
     CreateBot(epollFd, event);
     while (true)
@@ -177,10 +177,11 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
             iss >> Chan;
         }   
         if ((int)command.find(' ', size) != -1) {
-            keys = command.substr(len + size, command.length());
+            keys = command.substr((int)command.find(' ', size), command.length());
             key = atoi(keys.c_str());
         }
-        // std::cout << "New cmd : [" << Chan << "]" << std::endl;
+        std::cout << "Key : [" << key << "]" << std::endl;
+        std::cout << "Chan : [" << Chan << "]" << std::endl;
         JoinCommand(Chan, getUser(socket), socket, key);
         return ;
     }

@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/09 19:42:15 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/06/01 17:47:14 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/02 19:06:03 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,13 +93,20 @@ void    Channel::choice_mode(std::string mode, Client name, std::string channel,
         }
         case 'k':
         {
+            std::stringstream iss(mode);
+            std::string word;
+            std::vector<std::string> words;
+
+            iss >> word;
+            iss >> word;
             if (mode[0] == '+' && size)
                 this->_mode_k = limit;
             else if (mode[0] == '+' && size == -1)
                 return (SendRPL(socket, ERR_INVALIDKEY(name.get_user(), channel)));
             else
                 this->_mode_k = 0;
-            this->_change = 'k';
+            this->_change = word;
+            // std::cout << "key [" << word << "]" << std::endl;
             break ;
         }
         case 'o':

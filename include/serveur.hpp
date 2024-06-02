@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/08 17:36:06 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/06/01 17:51:59 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/02 18:40:12 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,13 +57,13 @@ class serveur
     private:
         int                             _socket;
         std::string                     _mdp;
-        std::string                     _mdprecu;
+        std::string                     _mdprecu; //
         std::map<int, std::string>      _mdpPort;
         int                             _port;
         std::vector<Channel>            _channel;
         std::vector<Client>             _client;
-        std::map<int, int>              _ret;
-        int                             _NickName;
+        std::map<int, int>              _ret;//
+        int                             _NickName; //
         std::map<int, std::string>      _commands;
         
         public:
