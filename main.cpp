@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 17:03:35 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/04/14 14:55:51 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/01 17:34:46 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,6 @@ int main(int argc, char **argv)
 }
 
 
-// ./IrcServ 6668 mdp executable with port | password
 // irssi -c localhost -p 6668 -w mdp -n kello // lancer IRssi client qui vas se co a ton serveur
 
 
@@ -48,8 +47,10 @@ int main(int argc, char **argv)
         - Si on quitte le channel et on est operator offrir loperator au suivant du chann
         (donner les droit au derniers ayant rejoin le channel)
 
-        - Completer les modes lorsqu'il manque les arguments (Renvoyer RPl necessaire)
+        - Completer les modes lorsqu'il ma
+        nque les arguments (Renvoyer RPl necessaire)
         - Quand mode est changer envoyer Rpl aux autres User
         - Envoyer RPL pour WHOIS.
+        Regarder prblm attribution +o a user
 
 */

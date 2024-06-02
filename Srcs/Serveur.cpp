@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:23:33 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/04/17 20:26:17 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/01 17:56:01 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,7 @@ void    serveur::connexion(int epollFd)
                 socklen_t clientAddrLen = sizeof(clientAddr);
                 clientSocket = accept(this->_socket, (sockaddr*)&clientAddr, &clientAddrLen);
                 setNonBlocking(clientSocket);
-                event.events = EPOLLIN | EPOLLET;
+                event.events = EPOLLIN;
                 event.data.fd = clientSocket;
                 epoll_ctl(epollFd, EPOLL_CTL_ADD, clientSocket, &event);
             }
@@ -139,7 +139,7 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
     int size = command.find(' ');
     int len_size;
     newCmd = command.substr(0, size);
-    std::cout << "New cmd : [" << newCmd << "]" << std::endl;
+    // std::cout << "New cmd : [" << newCmd << "]" << std::endl;
     if (newCmd == "CAP") {
         this->_ret[socket] = 1;
         return ;
@@ -180,7 +180,7 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
             keys = command.substr(len + size, command.length());
             key = atoi(keys.c_str());
         }
-        std::cout << "New cmd : [" << Chan << "]" << std::endl;
+        // std::cout << "New cmd : [" << Chan << "]" << std::endl;
         JoinCommand(Chan, getUser(socket), socket, key);
         return ;
     }
@@ -271,6 +271,11 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
         Names(channel, socket);
         return ;
     }
+    else if (newCmd == "WHOIS")
+    {
+        Whois(socket);
+        return ;
+    }
     else if (newCmd == "MODE")
     {
         size = command.find('#') + 1;
@@ -283,6 +288,7 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
             if (socketretriev < 0)
                 return (SendRPL(socket, ERR_NOSUCHNICK(user)));
             Client users = getUser(socketretriev);
+            std::cout << "name [" << users.get_user() << "]" << std::endl;
         }
         else {
             int debut;
@@ -314,11 +320,6 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
     }
 }
    
-    //creer un bot               [FAIT DOIT ETRE AMELIORER POUR ENVOYER MSG EN PV]
-    //Mocupper de la cmd quit    [FAIT]
-    //Mocupper du signaux ctrl C [FAIT]
-    //Mocupper du signaux ctrl D [FAIT]
-
 
 void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_event* events, int i, int epollFd)
 { 
@@ -351,13 +352,14 @@ void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_ev
         return ;
     if (ret > 0 && this->_commands[events[i].data.fd].find('\n')) {
         while (j < (int)this->_commands[events[i].data.fd].length()) {
+            // std::cout << "IRC command : [" << events[i].data.fd << "] --- command [" << this->_commands[events[i].data.fd] << "]" << std::endl;
             size = this->_commands[events[i].data.fd].find('\n', j);
             if (size == -1)
                 size = this->_commands[events[i].data.fd].find('\r', j) - 1;
-            std::cout << "size : " << size << std::endl;
+            // std::cout << "size : " << size << std::endl;
             count = size - j - 1;
             command = this->_commands[events[i].data.fd].substr(j, count);
-            std::cout << "command : [" << command << "]" << std::endl;
+            // std::cout << "command : [" << command << "]" << std::endl;
             if (command.length() > 2)
                 Use(command, events[i].data.fd, event, epollFd);
             command = "";
@@ -367,6 +369,22 @@ void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_ev
     this->_commands[events[i].data.fd] = "";
 }
 
+void    Channel::ChangeClient(std::string mode)
+{
+    std::stringstream iss(mode);
+    std::string word;
+    std::vector<std::string> words;
+
+    // Utilisation de std::getline avec un délimiteur d'espace pour découper la chaîne en mots
+    // while (std::getline(iss, word, ' ')) {
+    //     words.push_back(word);
+    // }
+    iss >> word;
+    iss >> word;
+
+    // Pour démontrer, on affiche chaque mot
+        std::cout << word << std::endl;
+}
 
 /*
             COMMENT ENVOYER ET RECEVOIR FICHIER

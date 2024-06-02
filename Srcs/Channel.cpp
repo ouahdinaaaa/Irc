@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/09 19:42:15 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/08 15:26:32 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/01 17:47:14 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ void    Channel::NewList(Client user)
     else if (imunite) {
         newlist[0].SetImunite();
         newlist[0].SetOperator(1);
-        std::cout << newlist[0].get_user() << std::endl;
+        // std::cout << newlist[0].get_user() << std::endl;
     }
     this->_list = newlist;
 }
@@ -67,6 +67,7 @@ void    Channel::choice_mode(std::string mode, Client name, std::string channel,
     }
     std::string Name = name.get_user();
     std::string User = name.get_name();
+    std::cout << "Mode : [" << mode << "] ||| Chan : [" << channel << "]" << std::endl;
     std::string message;
     if (mode[0] != '+' && mode[0] != '-')
         return ;
@@ -103,11 +104,7 @@ void    Channel::choice_mode(std::string mode, Client name, std::string channel,
         }
         case 'o':
         {
-            if (mode[0] == '+')
-                this->_mode_o = 1;
-            else
-                this->_mode_o = 0;
-            this->_change = 'o';
+            ChangeClient(mode);
             break;
         }
         case 'l':

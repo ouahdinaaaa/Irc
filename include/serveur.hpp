@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/08 17:36:06 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/12 17:08:03 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/01 17:51:59 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,6 +94,7 @@ class serveur
         void    PrintClient(Channel &chan);
         void    Delete(int socket);
         void    Bot_cmd(int socket);
+        void    Whois(int socket);
         void    CreateBot(int epollFd, epoll_event event);
         void    EveryDelete(int epollFd, epoll_event *events, epoll_event event);
         void    retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_event* events, int i, int epollFd);

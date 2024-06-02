@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 10:25:03 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/15 19:48:54 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/01 17:28:01 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,4 +156,15 @@ void    serveur::KickUser(std::string &channel, std::string &reason, int socket)
             it->NewList(*its);
         }
     }
+}
+
+void    serveur::Whois(int socket)
+{
+    (void)socket;
+    // Client _user = getUser(socket);
+    // std::string message;
+
+    // message = RPL_WHOISUSER(_user.get_user(), "", _user.get_name());
+    // std::cout << "message Whois [" << message << "]" << std::endl; 
+    // SendRPL(socket, message);
 }

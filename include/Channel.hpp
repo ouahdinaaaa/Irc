@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/08 17:06:55 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/05 13:45:15 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/01 17:52:21 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,7 @@ class Channel
     void                 SetMode_k(int boolean) {this->_mode_k = boolean; };
     void                 SetMode_o(int boolean) {this->_mode_o = boolean; };
     void                 SetMode_l(int boolean) {this->_mode_l = boolean; };
+    void                 ChangeClient(std::string mode);
     void                 choice_mode(std::string mode, Client name, std::string channel, int socket);
     Channel              &operator=(const Channel &other);
     std::string          ListClient();
