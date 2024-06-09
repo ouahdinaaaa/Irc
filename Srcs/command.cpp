@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 10:25:03 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/06/01 17:28:01 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/04 11:29:37 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,11 +48,8 @@ void    serveur::JoinCommand(const std::string &channelName, Client userName, in
         SendMsg(Name, message, userName.get_socket(), 1);
     }
     else {
-        std::vector<Client>::iterator its = std::find(this->_client.begin(), this->_client.end(), userName);
-        its->SetOperator(1);
-        its->SetImunite();
-        userName.SetOperator(1);
         userName.SetImunite();
+        userName.SetOperator(1);
         Channel NewChan(channelName);
         NewChan.Add(userName);
         this->_channel.push_back(NewChan);
@@ -75,7 +72,6 @@ void    serveur::PartCommand(std::string &channel, int socket, std::string reaso
     Client  user = getUser(socket);
     std::vector<Channel>::iterator it = std::find(this->_channel.begin(), this->_channel.end(), name);
     if (it != this->_channel.end()){
-        PrintClient(*it);
         std::vector<Client> Chan = it->get_client();
         std::vector<Client>::iterator its = std::find(Chan.begin(), Chan.end(), user);
         if (its != Chan.end()) {
@@ -98,8 +94,10 @@ void    serveur::PartCommand(std::string &channel, int socket, std::string reaso
 
 void    serveur::Invite(std::string &user, std::string &channel, int socket)
 {
+    std::vector<Channel>::iterator iti = std::find(this->_channel.begin(), this->_channel.end(), channel);
     Client _user = getUser(socket);
     std::string name = _user.get_user();
+    Client _user2 = iti->get_client_name(name);
     int newsocket = RetrieveSocketChan(channel, name); // verifier que lutilisateur est bien present dans le channel
     if (newsocket < 0) {
         std::string message = ERR_NOTONCHANNEL(name, channel);
@@ -115,7 +113,7 @@ void    serveur::Invite(std::string &user, std::string &channel, int socket)
     int targetsock = RetrieveSocket(user);
     if (targetsock < 0)
         return(SendRPL(socket, ERR_NOSUCHNICK(name))); //penser a envoyer msg derreur user dosent existed
-    if (!_user.GetOperator())
+    if (!_user2.GetOperator())
         return (SendRPL(socket, ERR_NOPRIVILEGES(name, channel)));
     Client UserInvite = getUser(targetsock);
     std::vector<Client>::iterator it = std::find(this->_client.begin(), this->_client.end(), UserInvite);
@@ -141,13 +139,16 @@ void    serveur::KickUser(std::string &channel, std::string &reason, int socket)
     }
     else
     {
+        std::vector<Channel>::iterator iti = std::find(this->_channel.begin(), this->_channel.end(), Chan);
         Client userKick = getUser(newsocket);
+        Client userKick2 = iti->get_client_name(userKick.get_user());
         Client _user = getUser(socket);
-        if (userKick.GetImunite() || !_user.GetOperator()){
+        Client _user2 = iti->get_client_name(_user.get_user());
+        if (userKick2.GetImunite() || !_user2.GetOperator()){
             message = ERR_NOPRIVILEGES(_user.get_user(), channel);
             return (SendRPL(socket, message));
         }
-        message = RPL_KICK(_user.get_name(), Chan, user, reason);
+        message = RPL_KICK(_user.get_user(), Chan, user, reason);
         std::vector<Channel>::iterator it = std::find(this->_channel.begin(), this->_channel.end(), name);
         std::vector<Client> list = (*it).get_client();
         std::vector<Client>::iterator its = std::find(list.begin(), list.end(), userKick);

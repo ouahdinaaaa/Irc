@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 11:01:26 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/08 20:20:32 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/03 13:50:12 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,6 @@ void    serveur::PrintClient(Channel &chan)
 {
     std::vector<Client> list = chan.get_client();
     for (std::vector<Client>::iterator it = list.begin(); it != list.end(); ++it) {
-        std::cout << "name : [" << (*it).get_user() << "]  |||| socket : " << (*it).get_socket() << std::endl;
+        std::cout << "name : [" << (*it).get_user() << "]  |||| socket : " << (*it).get_socket() << "||| imunite [" << (*it).GetImunite() << "] ||| operator [" << (*it).GetOperator() << "]" << std::endl;
     }
 }

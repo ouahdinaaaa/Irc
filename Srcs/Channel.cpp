@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/09 19:42:15 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/06/02 19:06:03 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/03 15:38:13 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,10 +44,20 @@ void    Channel::NewList(Client user)
     else if (imunite) {
         newlist[0].SetImunite();
         newlist[0].SetOperator(1);
-        // std::cout << newlist[0].get_user() << std::endl;
     }
     this->_list = newlist;
 }
+
+Client               Channel::get_client_name(std::string name)
+{
+    for (std::vector<Client>::iterator it = _list.begin(); it != _list.end(); ++it)
+    {
+        if ((*it).get_user() == name)
+            return (*it);
+    }
+    return (*_list.begin());
+}
+
 
 void    Channel::choice_mode(std::string mode, Client name, std::string channel, int socket)
 {
@@ -106,7 +116,6 @@ void    Channel::choice_mode(std::string mode, Client name, std::string channel,
             else
                 this->_mode_k = 0;
             this->_change = word;
-            // std::cout << "key [" << word << "]" << std::endl;
             break ;
         }
         case 'o':

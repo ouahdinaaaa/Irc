@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:23:33 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/06/02 19:16:43 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/04 11:47:44 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -374,17 +374,20 @@ void    Channel::ChangeClient(std::string mode)
 {
     std::stringstream iss(mode);
     std::string word;
-    std::vector<std::string> words;
+    std::string words;
 
-    // Utilisation de std::getline avec un délimiteur d'espace pour découper la chaîne en mots
-    // while (std::getline(iss, word, ' ')) {
-    //     words.push_back(word);
-    // }
     iss >> word;
-    iss >> word;
+    iss >> words;
 
-    // Pour démontrer, on affiche chaque mot
-        std::cout << word << std::endl;
+        std::cout << "[" << word << "]" <<  std::endl;
+        std::cout << "[" << words << "]" <<  std::endl;
+        if (words.length() < 1)
+            std::cout << "\n\n-------------ENVOIE RPL OUBLIE DE PARAM-----------\n\n" << std::endl;
+        for (std::vector<Client>::iterator it = _list.begin(); it != _list.end(); it++)
+        {
+            if (words == (*it).get_user())
+                (*it).SetOperator(1);
+        }
 }
 
 /*
@@ -395,6 +398,7 @@ void    Channel::ChangeClient(std::string mode)
             - recoit le fichier
             -Parsing avec nc a regler [FAIT]
             - Envoyer info dans l'odre sinon marche pas[veriier cette info]
+
 
             verifier Valgrind
             Verifier Valgrind leak

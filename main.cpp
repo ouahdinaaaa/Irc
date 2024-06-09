@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 17:03:35 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/06/01 17:34:46 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/08 16:45:08 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,8 +40,6 @@ int main(int argc, char **argv)
 
 
 // irssi -c localhost -p 6668 -w mdp -n kello // lancer IRssi client qui vas se co a ton serveur
-
-
 /*
             Ce qui faut regler
         - Si on quitte le channel et on est operator offrir loperator au suivant du chann

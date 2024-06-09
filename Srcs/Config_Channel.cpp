@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 10:53:26 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/08 15:28:26 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/04 11:29:47 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,9 +50,9 @@ void    serveur::ConfigMode(std::string &channel, std::string &mode, int socket)
     if (mode.length() < 2)
         return ;
     std::vector<Channel>::iterator it = std::find(this->_channel.begin(), this->_channel.end(), Name);
+    Client _user2 = (*it).get_client_name(_user.get_user());
     if (it != this->_channel.end()){
-        // std::cout << "Name : [" << _user.get_user() << "] ||| imunite : [" << _user.GetImunite() << "]" << std::endl;
-        if (!_user.GetOperator())
+        if (!_user2.GetOperator())
             return (SendRPL(socket, ERR_NOPRIVILEGES(name, channel)));
         it->choice_mode(mode, _user, channel, socket);
     }
