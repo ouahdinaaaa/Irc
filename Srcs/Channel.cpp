@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/09 19:42:15 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/06/03 15:38:13 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/11 13:12:29 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,10 +41,10 @@ void    Channel::NewList(Client user)
     }
     if (newlist.size() < 1)
         this->_list = std::vector<Client>();
-    else if (imunite) {
-        newlist[0].SetImunite();
-        newlist[0].SetOperator(1);
-    }
+    // else if (imunite) {
+    //     newlist[0].SetImunite();
+    //     newlist[0].SetOperator(1);
+    // }
     this->_list = newlist;
 }
 
@@ -85,19 +85,28 @@ void    Channel::choice_mode(std::string mode, Client name, std::string channel,
     {
         case 'i':
         {
-            if (mode[0] == '+')
-                this->_mode_i = 1;
-            else
+            if (mode[0] == '+'){
                 this->_mode_i = 0;
+                this->_mode_i = 1;
+                this->_changei = "+i";
+            } else {
+                    this->_changei = "-i";
+            }
             this->_change = 'i';
             break;
         }
         case 't':
         {
             if (mode[0] == '+')
+            {
                 this->_mode_t = 1;
+                this->_changet = "+t";
+            }
             else
+            {
                 this->_mode_t = 0;
+                this->_changet = "-t";
+            }
             this->_change = 't';
             break;
         }
@@ -109,28 +118,36 @@ void    Channel::choice_mode(std::string mode, Client name, std::string channel,
 
             iss >> word;
             iss >> word;
-            if (mode[0] == '+' && size)
+            if (mode[0] == '+' && size) {
                 this->_mode_k = limit;
+            }
             else if (mode[0] == '+' && size == -1)
                 return (SendRPL(socket, ERR_INVALIDKEY(name.get_user(), channel)));
-            else
-                this->_mode_k = 0;
-            this->_change = word;
+            else {
+                    this->_mode_k = 0;
+                    this->_changek = "-k";
+                }
+                this->_change = word;
             break ;
         }
         case 'o':
         {
-            ChangeClient(mode);
+            ChangeClient(mode, Name, socket);
             break;
         }
         case 'l':
         {
-            if (mode[0] == '+' && size == -1)
+            if (mode[0] == '+' && size == -1){ 
                 this->_mode_l = 5;
-            else if (mode[0] == '+' && size)
+            this->_changel = "+l"; 
+            } else if (mode[0] == '+' && size){
                 this->_mode_l = limit;
+                this->_changel = "+l";
+            }
             else
+            {
                 this->_mode_l = 0;
+            }
             this->_change = 'l';
             break ;
         }
@@ -139,7 +156,7 @@ void    Channel::choice_mode(std::string mode, Client name, std::string channel,
     }
     if (mode[0] == '+')
         message = SET_CHANEL_MODE(Name, User, "MODE", channel, mode[1]);
-    else
+    else if (mode [0] == '-')
         message = UNSET_CHANEL_MODE(Name, User, "MODE", channel, mode[1]);
     SendRPL(socket, message);
 }

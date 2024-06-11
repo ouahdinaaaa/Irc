@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 10:25:03 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/06/04 11:29:37 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/11 13:12:16 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,9 +77,9 @@ void    serveur::PartCommand(std::string &channel, int socket, std::string reaso
         if (its != Chan.end()) {
             std::string msg = PART_CHANEL((*its).get_user(), (*its).get_name(), "PART", nameChannel);
             std::string message = PART((*its).get_user(), (*its).get_name(), (*it).getname(), reason);
+            it->NewList(*its);
             SendRPL(socket, message);
             SendMsg(*it, msg, user.get_socket(), 1);
-            it->NewList(*its);
         }
         else {
             std::string message = ERR_NOTONCHANNEL(user.get_user(), channel);
