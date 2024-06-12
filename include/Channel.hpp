@@ -44,7 +44,9 @@ class Channel
     public:
     Channel(const Channel &other);
     // Channel(const std::string &name) : _name(name), _list(), _Banned(), _mode_i(0) {};
-    Channel(const std::string &name) : _name(name), _list(), _Banned(), _Inviting(), _mode_i(0), _mode_t(0), _mode_k(0), _mode_o(0), _mode_l(0), _change("0"), send_msg(0) {};
+    Channel(const std::string &name) : _name(name), _Banned(), _Inviting(), _mode_i(0), _mode_t(0), _mode_k(0), _mode_o(0), _mode_l(0), _change("0"), send_msg(0) {
+        this->_list = std::vector<Client>();
+    };
     ~Channel() {};
     
     bool                 operator==(const Channel &other) const { return _name == other._name; };
