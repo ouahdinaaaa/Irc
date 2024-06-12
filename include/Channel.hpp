@@ -73,6 +73,7 @@ class Channel
     std::string          &getname() {return this->_name; };
     std::string          GetTopic() {return this->_topic; };
     std::vector<Client>  get_client() {return this->_list;};
+    void                 verifSend(std::string &mode);
     void                 ChangeList(std::vector<Client> Newlist) {this->_list = Newlist;};
 };
 

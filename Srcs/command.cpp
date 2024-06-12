@@ -162,8 +162,8 @@ void    serveur::KickUser(std::string &channel, std::string &reason, int socket)
 void    serveur::Whois(int socket)
 {
     (void)socket;
-    // Client _user = getUser(socket);
-    // std::string message;
+    Client _user = getUser(socket);
+    std::string message;
 
     // message = RPL_WHOISUSER(_user.get_user(), "", _user.get_name());
     // std::cout << "message Whois [" << message << "]" << std::endl; 

@@ -31,20 +31,13 @@ void    Channel::Add(Client user)
 void    Channel::NewList(Client user)
 {
     std::vector<Client> newlist;
-    int imunite = 0;
     for (std::vector<Client>::iterator it = this->_list.begin(); it != this->_list.end(); ++it)
     {
-        if (user.GetImunite())
-            imunite = 1;       
         if (user.get_user() != (*it).get_user())
             newlist.push_back(*it);
     }
     if (newlist.size() < 1)
         this->_list = std::vector<Client>();
-    // else if (imunite) {
-    //     newlist[0].SetImunite();
-    //     newlist[0].SetOperator(1);
-    // }
     this->_list = newlist;
 }
 
@@ -81,33 +74,23 @@ void    Channel::choice_mode(std::string mode, Client name, std::string channel,
     std::string message;
     if (mode[0] != '+' && mode[0] != '-')
         return ;
+    verifSend(mode);
     switch (mode[1])
     {
         case 'i':
         {
-            if (mode[0] == '+'){
-                this->_mode_i = 0;
+            if (mode[0] == '+')
                 this->_mode_i = 1;
-                this->_changei = "+i";
-            } else {
-                    this->_changei = "-i";
-            }
-            this->_change = 'i';
+            else if (mode[0] == '-')
+                    this->_mode_i = 0;
             break;
         }
         case 't':
         {
             if (mode[0] == '+')
-            {
                 this->_mode_t = 1;
-                this->_changet = "+t";
-            }
-            else
-            {
+            else if (mode[0] == '-')
                 this->_mode_t = 0;
-                this->_changet = "-t";
-            }
-            this->_change = 't';
             break;
         }
         case 'k':
@@ -123,11 +106,8 @@ void    Channel::choice_mode(std::string mode, Client name, std::string channel,
             }
             else if (mode[0] == '+' && size == -1)
                 return (SendRPL(socket, ERR_INVALIDKEY(name.get_user(), channel)));
-            else {
+            else if (mode[0] == '-')
                     this->_mode_k = 0;
-                    this->_changek = "-k";
-                }
-                this->_change = word;
             break ;
         }
         case 'o':
@@ -137,26 +117,20 @@ void    Channel::choice_mode(std::string mode, Client name, std::string channel,
         }
         case 'l':
         {
-            if (mode[0] == '+' && size == -1){ 
+            if (mode[0] == '+' && size == -1) 
                 this->_mode_l = 5;
-            this->_changel = "+l"; 
-            } else if (mode[0] == '+' && size){
+            else if (mode[0] == '+' && size)
                 this->_mode_l = limit;
-                this->_changel = "+l";
-            }
-            else
-            {
+            else if (mode[0] == '-')
                 this->_mode_l = 0;
-            }
-            this->_change = 'l';
             break ;
         }
         default:
         return ;
     }
-    if (mode[0] == '+')
+    if (mode[0] == '+' && getmsg())
         message = SET_CHANEL_MODE(Name, User, "MODE", channel, mode[1]);
-    else if (mode [0] == '-')
+    else if (mode [0] == '-' && getmsg())
         message = UNSET_CHANEL_MODE(Name, User, "MODE", channel, mode[1]);
     SendRPL(socket, message);
 }
@@ -171,6 +145,71 @@ std::string Channel::ListClient()
         list += " ";
     }
     return list;
+}
+
+
+void    Channel::verifSend(std::string &mode)
+{
+
+    switch (mode [1])
+    {
+        case 'i':
+        {
+            if (Getmode_i() && mode[0] == '+')
+                this->send_msg = 0;
+            else if (!Getmode_i() && mode[0] == '-')
+                this->send_msg = 0;
+            else 
+                this->send_msg = 1;
+            break;
+        }
+        case 't':
+        {
+            if (Getmode_t() && mode[0] == '+')
+                this->send_msg = 0;
+            else if (!Getmode_t() && mode[0] == '-')
+                this->send_msg = 0;
+            else 
+                this->send_msg = 1;
+            break;
+
+        }
+        case 'k':
+        {
+            if (Getmode_k() && mode[0] == '+')
+                this->send_msg = 0;
+            else if (!Getmode_k() && mode[0] == '-')
+                this->send_msg = 0;
+            else 
+                this->send_msg = 1;
+            break;
+
+        }
+        case 'l':
+        {
+            if (Getmode_l() && mode[0] == '+')
+                this->send_msg = 0;
+            else if (!Getmode_l() && mode[0] == '-')
+                this->send_msg = 0;
+            else 
+                this->send_msg = 1;
+            break;
+
+        }
+        case 'o':
+        {
+            if (Getmode_o() && mode[0] == '+')
+                this->send_msg = 0;
+            else if (!Getmode_o() && mode[0] == '-')
+                this->send_msg = 0;
+            else 
+                this->send_msg = 1;
+            break;
+
+        }
+        default:
+        return ;
+    }
 }
 
 Channel &Channel::operator=(const Channel &other)
