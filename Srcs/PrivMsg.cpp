@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 11:01:26 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/06/03 13:50:12 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/12 21:00:32 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,27 @@
 void    serveur::PrivMsg(std::string &channel, std::string &msg, int socket)
 {
     Channel name(channel);
-    // std::cout << "msg : [" << msg << "]" << std::endl;
+    Client user = getUser(socket);
+    std::vector<Channel>::iterator  it = std::find(this->_channel.begin(), this->_channel.end(), name);
+    std::vector<Client> list = (*it).get_client();
+    if (((*it).get_client()).size() < 1 || list.size() < 1)
+    {
+            std::string message = ERR_NOTONCHANNEL(user.get_user(), name.getname()) ;
+            return (SendRPL(socket, message));
+    }
+    std::cout << "YOUHOU" << std::endl;
+   for(std::vector<Client>::iterator its = list.begin(); its != list.end(); ++its)
+    {
+        if ((*its).get_socket() == socket)
+            break ;
+        if (its != list.end())
+        {
+            std::string message = ERR_NOTONCHANNEL(user.get_user(), name.getname()) ;
+            return (SendRPL(socket, message));
+        }
+    }
     if (msg == ":Bot" || msg == ":BOT")
         return (Bot_cmd(socket));
-    std::vector<Channel>::iterator  it = std::find(this->_channel.begin(), this->_channel.end(), name);
     if (it != this->_channel.end()) 
         PrivChannel(*it, socket, msg);
 }

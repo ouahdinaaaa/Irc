@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:23:33 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/06/11 13:04:32 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/12 20:58:46 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -216,6 +216,12 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
     len_size = command.find('#');
     if (newCmd == "PRIVMSG" && len_size != -1)  {
         size = command.find(':');
+        if (size == -1)
+        {
+            Client  clientin = getUser(socket);
+            std::string message = ERR_NEEDMOREPARAMS(clientin.get_user(), "PRIVMSG");
+            return (SendRPL(socket, message));
+        }
         int len = size - command.find('#') - 2;
         std::string Channel = command.substr((command.find('#') + 1), len);
         Chan = command.substr(size, command.length());
