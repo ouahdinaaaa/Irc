@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:23:33 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/06/12 20:58:46 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/13 15:21:18 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -388,7 +388,7 @@ void    Channel::ChangeClient(std::string mode, std::string name, int socket)
             Rajouter si membre operator a quitter chann doit pouvoit donner les pouvoir au second qui a rejoint [rajouter]
             Envoyer message a tout le monde quand quitte channels.[Fait]
 
-
+            CTRL + Z supprimer le client du serveur !!!!
 
         // PROBLEME A VERIFIER SEND DES RPL PEUT IMPORTE COMBIEND DE FOIS MODE ENVOYER //
 
