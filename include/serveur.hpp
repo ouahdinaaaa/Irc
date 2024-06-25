@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/08 17:36:06 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/06/25 17:29:15 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/25 19:29:49 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,8 @@
 #include <sys/socket.h>
 #include <sstream>
 #include "Numeric_Rpl.hpp"
+#include <signal.h>
+#include <csignal>
 
 # define BLACK "\033[30m"
 # define GREEN "\033[32m"
@@ -45,8 +47,7 @@
 # define ORANGE "\033[38;5;166m"
 # define RESET "\033[1;97m"
 
-
-extern int ctrl_c;
+extern bool running;
 
 const int MAX_EVENTS = 10;
 
@@ -56,6 +57,10 @@ class serveur
 {
     private:
         int                             _socket;
+        int                             _epollFd;
+        int                             numEvents;
+        epoll_event                     _event;
+        epoll_event                     *_events;
         std::string                     _mdp;
         std::string                     _mdprecu; //
         std::map<int, std::string>      _mdpPort;
@@ -70,7 +75,7 @@ class serveur
         public:
         serveur() : _mdpPort(), _channel(), _client(), _ret(), _NickName(0), _commands() {};
         serveur(char *port, char *mdp);
-        ~serveur() {};
+        ~serveur();
         void    JoinCommand(const std::string &channelName, Client userName, int socket, int key);
         int     FirstParam();
         void    PartCommand(std::string &channel, int socket, std::string reason);
@@ -105,8 +110,8 @@ class serveur
         void     Doublons(int socket);
 };
 
-void    signal_ctrl_c(int signal);
-void    deletec(int signal);
+void    sig_ctrl_c(int sig);
+// void    deletec(int signal);
 void    setNonBlocking(int sockfd);
 void    SendRPL(int socket, std::string message);
 std::string    splitString(std::string &line);

@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 10:52:30 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/06/11 13:20:58 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/25 19:58:07 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,12 @@
 
 void    serveur::Delete(int socket)
 {
+    std::vector<Client>::iterator it ;    
+    for (it = this->_client.begin(); it != this->_client.end(); it++){
+        ;
+    }
+    if (it == this->_client.end())
+        return ;
     Client _user = getUser(socket);
     for (std::vector<Channel>::iterator it = this->_channel.begin(); it != this->_channel.end(); ++it) {
         it->NewList(_user);
@@ -88,8 +94,8 @@ void serveur::DeleteChan(int socket)
 void    serveur::EveryDelete(int epollFd, epoll_event *events, epoll_event event)
 {
     
-    int numEvents = epoll_wait(epollFd, events, MAX_EVENTS, -1);
-    for (int i = 0; i < numEvents; ++i)
+    this->numEvents = epoll_wait(epollFd, events, MAX_EVENTS, -1);
+    for (int i = 0; i < this->numEvents; ++i)
     {
         Delete(events[i].data.fd);
         epoll_ctl(epollFd,  EPOLL_CTL_DEL, events[i].data.fd, &event);

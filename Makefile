@@ -6,15 +6,16 @@
 #    By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/05 17:03:19 by ayael-ou          #+#    #+#              #
-#    Updated: 2024/02/07 11:07:12 by ayael-ou         ###   ########.fr        #
+#    Updated: 2024/06/25 19:05:38 by ayael-ou         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = IrcServ
+CXXFLAGS = -Wall -Wextra -Werror -g3 -std=c++98
 
 SRC_DIR = ./
 SRCS = 	main.cpp\
-		Srcs/Channel.cpp\
+		./Srcs/Channel.cpp\
 		./Srcs/Serveur.cpp\
 		./Srcs/Client.cpp\
 		./Srcs/Config_Channel.cpp\
@@ -25,15 +26,15 @@ SRCS = 	main.cpp\
 		./Srcs/command.cpp\
 		./Srcs/Bot.cpp\
 
-OBJS = ${SRCS:.cpp=.o}
-CC = c++
+OBJS = ${SRCS:%.cpp=%.o}
+CXX = c++
 RM = rm -rf
 
 %.o: %.cpp
-	${CC} -c $< -o $@ -std=c++98 -Wall -Wextra -Werror -g3
+	${CXX} $(CXXFLAGS) -c $< -o $@  
 
 ${NAME}: ${OBJS}
-	${CC} ${OBJS} -o ${NAME}
+	${CXX} $(CXXFLAGS) ${OBJS} -o ${NAME}
 
 all : ${NAME}
 
@@ -45,4 +46,4 @@ fclean : clean
 
 re : fclean all
 
-.PHONY : all clean fclean re
+# .PHONY : all clean fclean re

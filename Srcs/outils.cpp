@@ -6,12 +6,11 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 10:26:47 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/12 19:04:43 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/25 19:30:03 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/serveur.hpp"
-#include <csignal>
 
 
 int serveur::RetrieveSocketChan(std::string &name, std::string &user)
@@ -48,13 +47,12 @@ Client serveur::getUser(int socket)
     return *it;
 }
 
-void    signal_ctrl_c(int signal)
+void    sig_ctrl_c(int sig)
 {
-    if (signal == SIGINT) {
-        ctrl_c = 1;
+    if (sig == SIGINT) {
+        running = false;
     }
 }
-
 
 std::string splitString(std::string &line) 
 {

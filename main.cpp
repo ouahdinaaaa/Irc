@@ -6,36 +6,28 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 17:03:35 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/06/11 12:32:04 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/25 19:29:54 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
-#include <iostream>
-#include <vector>
-#include <algorithm>
-#include <cmath>
-#include <cstring>
-#include <unistd.h>
-#include <sys/epoll.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <fcntl.h>
-#include <sys/types.h>
 #include "./include/Irc.hpp"
 #include "./include/serveur.hpp"
-#include <sys/socket.h>
 
-int ctrl_c;
+bool running = true;
 
 int main(int argc, char **argv)
 {
-    // signal(SIGIN, signal_ctrl_c);
     srand(time(NULL));
     if (argc != 3){
         std::cout << "Error of params in you input. Port and mdp !!!" << std::endl;
         return 1;
     }
+    struct sigaction sa;
+    std::memset(&sa, 0, sizeof(sa));
+    sa.sa_handler = sig_ctrl_c;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sigaction(SIGINT, &sa, NULL);
     serveur prin(argv[1], argv[2]);
 }
 
