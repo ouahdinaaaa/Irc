@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/08 17:36:06 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/06/25 14:19:00 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/25 17:29:15 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,7 @@ class serveur
         std::map<int, int>              _ret;//
         int                             _NickName; //
         std::map<int, std::string>      _commands;
+        std::map<int, std::string>      _nick;
         
         public:
         serveur() : _mdpPort(), _channel(), _client(), _ret(), _NickName(0), _commands() {};
@@ -105,6 +106,7 @@ class serveur
 };
 
 void    signal_ctrl_c(int signal);
+void    deletec(int signal);
 void    setNonBlocking(int sockfd);
 void    SendRPL(int socket, std::string message);
 std::string    splitString(std::string &line);

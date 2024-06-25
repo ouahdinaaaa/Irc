@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:23:33 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/06/25 14:45:54 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/25 17:36:41 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,28 +134,42 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
     std::string Chan; 
     std::string newCmd;
 
+    signal(	SIGINT, SIG_IGN);
+    signal(SIGINT, deletec);
     std::vector<std::string> spliit;
     //fonction verif si utilisateur dans serveur et si sa command diff msg err
     int size = command.find(' ');
     int len_size;
     newCmd = command.substr(0, size);
-    Doublons(socket);
+    if (ctrl_c == 2)
+    {
+        std::cout << "couuuuut" << std::endl;
+        Delete(socket);
+        ctrl_c = 0;
+    }
+    // Doublons(socket);
+    if (newCmd == "CAP")
+        return ;
     if (verifOP(socket, newCmd))
         return ;
     if (newCmd == "NICK"){
         Chan = command.substr(size + 1, command.length());
         if (UserExist(Chan))
-            return (SendRPL(socket, ERR_NICKNAMEINUSE(Chan)));
+            return (this->_ret[socket] = 2,SendRPL(socket, ERR_NICKNAMEINUSE(Chan)));
         if (Chan.length() > 8)
-            return ;
-        Client newClient(Chan, socket);
-        (*this)._client.push_back(newClient);
+            return ;            
+        this->_nick[socket] = Chan;
+        if (this->_ret[socket] == 2) {
+            std::string msg = RPL_WELCOME(Chan);
+            return (SendRPL(socket, msg));
+        }
         this->_ret[socket] = 0;
         return ;
     }
     else if (newCmd == "PING")
         return(SendRPL(socket, RPL_PONG));
     else if (newCmd == "PASS"){
+        this->_ret[socket] = 1;
         Chan = command.substr(size + 1, command.length());
         this->_mdpPort[socket] = Chan;
         return ;
@@ -184,22 +198,13 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
         return ;
     }
     else if (newCmd == "USER") {
-        if (GetNickName()) {
-            this->_NickName = 0;
-            return ; }
-        if (!ValidUser(socket))
-            return ;
-        Client user = getUser(socket);
+        this->_NickName = 0;
         size_t pos = command.find(' ', size + 1);
         Chan = command.substr(size + 1, pos - (size + 1));
-        user.set_user(Chan);
-        std::vector<Client>::iterator it = std::find(this->_client.begin(), this->_client.end(), user);
-        if (it != this->_client.end()){
-            this->_client.erase(it);
-            this->_client.push_back(user);
-        }
         if (this->_ret[socket] != 0)
             return ;
+        Client user(this->_nick[socket], Chan, socket);
+        (*this)._client.push_back(user);
         std::string msg = RPL_WELCOME(user.get_user());
         if (this->_mdp != this->_mdpPort[socket])
             msg = ERR_PASSWDMISMATCH(Chan);
@@ -345,8 +350,8 @@ void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_ev
         } else {
             this->_commands[events[i].data.fd] += string + "\r\n"; }
     }
-    if (((int)string.find('\n') == -1 || string.length() < 2) && this->_commands[events[i].data.fd].length() > 0)
-        return ;
+    // if (((int)string.find('\n') == -1 || string.length() < 2) && this->_commands[events[i].data.fd].length() > 0)
+    //     return ;
     if (ret > 0 && this->_commands[events[i].data.fd].find('\n')) {
         while (j < (int)this->_commands[events[i].data.fd].length()) {
             size = this->_commands[events[i].data.fd].find('\n', j);
@@ -412,6 +417,12 @@ int    serveur::verifOP(int socker, std::string command)
     return 1;
 }
 
+void    deletec(int signal)
+{
+    if (signal == SIGINT) {
+        ctrl_c = 2;
+    }
+}
 /*
             COMMENT ENVOYER ET RECEVOIR FICHIER
 
