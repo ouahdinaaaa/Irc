@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/12 11:23:33 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/06/15 17:59:41 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/06/25 14:45:54 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ void    serveur::connexion(int epollFd)
     {
         int numEvents = epoll_wait(epollFd, events, MAX_EVENTS, -1);
         if (numEvents == -1){
-            // EveryDelete(epoll)
+            EveryDelete(epollFd, events, event);
             close(epollFd);
             close(this->_socket);
             delete[]events;
@@ -107,8 +107,6 @@ void    serveur::connexion(int epollFd)
         for (int i = 0; i < numEvents; ++i) {
             if (events[i].data.fd == this->_socket)
             {
-                // std::cout << "\n\n------------socket : [" << this->_socket << std::endl;
-                // Nouvelle connexion entrante
                 sockaddr_in clientAddr;
                 socklen_t clientAddrLen = sizeof(clientAddr);
                 clientSocket = accept(this->_socket, (sockaddr*)&clientAddr, &clientAddrLen);
@@ -137,22 +135,23 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
     std::string newCmd;
 
     std::vector<std::string> spliit;
-    verifOP(socket, command);
     //fonction verif si utilisateur dans serveur et si sa command diff msg err
     int size = command.find(' ');
     int len_size;
     newCmd = command.substr(0, size);
+    Doublons(socket);
+    if (verifOP(socket, newCmd))
+        return ;
     if (newCmd == "NICK"){
         Chan = command.substr(size + 1, command.length());
         if (UserExist(Chan))
             return (SendRPL(socket, ERR_NICKNAMEINUSE(Chan)));
-        std::string msg = RPL_WELCOME(Chan);
-        if (this->_mdp != this->_mdpPort[socket])
-            msg = ERR_PASSWDMISMATCH(Chan);
+        if (Chan.length() > 8)
+            return ;
         Client newClient(Chan, socket);
         (*this)._client.push_back(newClient);
         this->_ret[socket] = 0;
-        return(SendRPL(socket, msg));
+        return ;
     }
     else if (newCmd == "PING")
         return(SendRPL(socket, RPL_PONG));
@@ -199,7 +198,12 @@ void    serveur::Use(std::string command, int socket, epoll_event event, int epo
             this->_client.erase(it);
             this->_client.push_back(user);
         }
-        return ;
+        if (this->_ret[socket] != 0)
+            return ;
+        std::string msg = RPL_WELCOME(user.get_user());
+        if (this->_mdp != this->_mdpPort[socket])
+            msg = ERR_PASSWDMISMATCH(Chan);
+        return(SendRPL(socket, msg));
     }
     else if (newCmd == "PART") {
         size = command.find(':');
@@ -329,19 +333,19 @@ void    serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_ev
     int j = 0;
     int size;
     int count = -1;
-    // std::cout << "... STRING : [" << string << "]" << std::endl;
+    std::cout << "... STRING : [" << string << "]" << std::endl;
     if (string.length() < 1)
         close(events[i].data.fd);
     if (((int)string.find('\n') == -1)) {
         if ((int)string.find('\r') == -1)
-            this->_commands[events[i].data.fd] += string + "\r\n";
+            this->_commands[events[i].data.fd] += string;
     } else {
         if ((int)string.find('\r') == -1){
             this->_commands[events[i].data.fd] += string.substr(0, string.length() - 1) + "\r\n";
         } else {
             this->_commands[events[i].data.fd] += string + "\r\n"; }
     }
-    if ((int)string.find('\n') == -1 || string.length() < 2)
+    if (((int)string.find('\n') == -1 || string.length() < 2) && this->_commands[events[i].data.fd].length() > 0)
         return ;
     if (ret > 0 && this->_commands[events[i].data.fd].find('\n')) {
         while (j < (int)this->_commands[events[i].data.fd].length()) {
@@ -380,13 +384,32 @@ void    Channel::ChangeClient(std::string mode, std::string name, int socket)
         }
 }
 
-void    serveur::verifOP(int socker, std::string command)
+void    serveur::Doublons(int socket)
+{
+    int count = 0;
+    for ( std::vector<Client>::iterator it = this->_client.begin(); it != this->_client.end(); it++)
+    {
+        if (count == 1 && (*it).get_socket() == socket)
+            Delete(socket);
+        else if ((*it).get_socket() == socket)
+            count++;
+    }  
+}
+
+
+int    serveur::verifOP(int socker, std::string command)
 {
     for (std::vector<Client>::iterator it = this->_client.begin(); it != this->_client.end(); it++)
     {
-        /* code */
+        if (socker == (*it).get_socket() || command == "USER" || command == "CAP" || command == "PASS" || command == "NICK")
+            return 0;
     }
-    
+    for (std::vector<Client>::iterator its = this->_client.begin(); its != this->_client.end(); its++)
+    {
+        if (socker == (*its).get_socket() && ((*its).get_name().length() < 0 && (command != "USER")))
+            return (Delete(socker), 1);
+    }
+    return 1;
 }
 
 /*
@@ -409,8 +432,5 @@ void    serveur::verifOP(int socker, std::string command)
             Rajouter si membre operator a quitter chann doit pouvoit donner les pouvoir au second qui a rejoint [rajouter]
             Envoyer message a tout le monde quand quitte channels.[Fait]
 
-            CTRL + Z supprimer le client du serveur !!!!
-
-        // PROBLEME A VERIFIER SEND DES RPL PEUT IMPORTE COMBIEND DE FOIS MODE ENVOYER //
 
 */
