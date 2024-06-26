@@ -56,11 +56,11 @@ class Channel;
 class serveur
 {
     private:
-        int                             _socket;
-        int                             _epollFd;
-        int                             numEvents;
-        epoll_event                     _event;
-        epoll_event                     *_events;
+       int _epollFd;
+    int _socket;
+    int numEvents;
+    struct epoll_event* _events;
+    struct epoll_event _event;
         std::string                     _mdp;
         std::string                     _mdprecu; //
         std::map<int, std::string>      _mdpPort;
@@ -71,6 +71,7 @@ class serveur
         int                             _NickName; //
         std::map<int, std::string>      _commands;
         std::map<int, std::string>      _nick;
+        void handle_sigint(int sig); 
         
         public:
         serveur() : _mdpPort(), _channel(), _client(), _ret(), _NickName(0), _commands() {};
@@ -104,14 +105,27 @@ class serveur
         void    Whois(int socket);
         void    CreateBot(int epollFd, epoll_event event);
         void    DeleteChan(int socket);
-        void    EveryDelete(int epollFd, epoll_event *events, epoll_event event);
+        // void    EveryDelete(int epollFd, epoll_event *events, epoll_event event);
         void    retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_event* events, int i, int epollFd);
         int    verifOP(int socket, std::string command);
         void     Doublons(int socket);
+
+
+
+    // void sig_ctrl_c(int sig); // Fonction membre non statique
+    void EveryDelete(int epollFd, struct epoll_event* events, struct epoll_event event);
+
+    // Ajouter un pointeur statique vers l'instance de la classe
+
+        static void sig_ctrl_c(int sig); // Rendre la fonction statique
+
+    // Ajouter un pointeur statique vers l'instance de la classe
+        static serveur* instance;
+
 };
 
-void    sig_ctrl_c(int sig);
-// void    deletec(int signal);
+
+
 void    setNonBlocking(int sockfd);
 void    SendRPL(int socket, std::string message);
 std::string    splitString(std::string &line);

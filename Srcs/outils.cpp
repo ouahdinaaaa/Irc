@@ -47,13 +47,6 @@ Client serveur::getUser(int socket)
     return *it;
 }
 
-void    sig_ctrl_c(int sig)
-{
-    if (sig == SIGINT) {
-        running = false;
-    }
-}
-
 std::string splitString(std::string &line) 
 {
     std::istringstream iss(line);

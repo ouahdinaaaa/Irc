@@ -22,12 +22,6 @@ int main(int argc, char **argv)
         std::cout << "Error of params in you input. Port and mdp !!!" << std::endl;
         return 1;
     }
-    struct sigaction sa;
-    std::memset(&sa, 0, sizeof(sa));
-    sa.sa_handler = sig_ctrl_c;
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;
-    sigaction(SIGINT, &sa, NULL);
     serveur prin(argv[1], argv[2]);
 }
 

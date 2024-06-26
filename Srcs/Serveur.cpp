@@ -62,10 +62,6 @@ serveur::~serveur()
 { }
 
 
-serveur::serveur(char *port, char *mdp) :_mdp(mdp), _mdpPort(), _port(atoi(port)), _channel(), _client(), _ret(), _NickName(0), _commands()
-{
-	FirstParam();
-}
 
 
 void setNonBlocking(int sockfd) {
@@ -92,15 +88,6 @@ void	serveur::connexion(int epollFd)
 			delete[]this->_events;
 			return ;
 		}
-		if (running == false && this->numEvents > 0)
-			EveryDelete(this->_epollFd, this->_events, this->_event);
-		else if (running == false)
-		{
-			delete []this->_events;
-			close(this->_epollFd);
-			close(this->_socket);
-			return ;
-		}
 		for (int i = 0; i < this->numEvents; ++i) {
 			if (this->_events[i].data.fd == this->_socket)
 			{
@@ -118,12 +105,12 @@ void	serveur::connexion(int epollFd)
 				if (ret == -1){
 					return ;
 				}
-					if (ret == 0)
-					{
+				if (ret == 0)
+				{
 						Delete (this->_events[i].data.fd);
-					}
-					buffer[ret] = '\0';
-					retrieve_cmd(ret, buffer, this->_event, this->_events, i, this->_epollFd);
+				}
+				buffer[ret] = '\0';
+				retrieve_cmd(ret, buffer, this->_event, this->_events, i, this->_epollFd);
 			}
 		}
 	}
@@ -187,7 +174,6 @@ void	serveur::Use(std::string command, int socket, epoll_event event, int epollF
 			if ((int)Chan.find(' ') != -1) {
 				std::istringstream  iss(Chan);
 				iss >> Chan; 
-				// std::cout << "Chan after istring : [" << Chan << "]" << std::endl;
 				}
 		} if ((int)command.find(' ', size) != -1) {
 			keys = command.substr((int)command.find(' ', size), command.length());
@@ -301,7 +287,6 @@ void	serveur::Use(std::string command, int socket, epoll_event event, int epollF
 			if (socketretriev < 0)
 				return (SendRPL(socket, ERR_NOSUCHNICK(user)));
 			Client users = getUser(socketretriev);
-			// std::cout << "name [" << users.get_user() << "]" << std::endl;
 		} else {
 			int debut;
 			int len = command.find(' ', size) - size;
@@ -350,7 +335,7 @@ void	serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_event
 			this->_commands[events[i].data.fd] += string + "\r\n"; }
 	}
 	// if (((int)string.find('\n') == -1 || string.length() < 2) && this->_commands[events[i].data.fd].length() > 0)
-	//	 return ;
+	// 	 return ;
 	if (ret > 0 && this->_commands[events[i].data.fd].find('\n')) {
 		while (j < (int)this->_commands[events[i].data.fd].length()) {
 			size = this->_commands[events[i].data.fd].find('\n', j);
@@ -416,12 +401,45 @@ int	serveur::verifOP(int socker, std::string command)
 	return 1;
 }
 
-// void	deletec(int signal)
-// {
-//	 if (signal == SIGINT) {
-//		 running = 2;
-//	 }
-// }
+
+serveur::serveur(char *port, char *mdp) : numEvents(0),_mdp(mdp), _mdpPort(), _port(atoi(port)), _channel(), _client(), _ret(), _NickName(0), _commands()
+{
+    serveur::instance = this; // Assigner l'instance au pointeur statique
+    signal(SIGINT, serveur::sig_ctrl_c);
+    FirstParam(); 
+}
+
+
+serveur* serveur::instance = NULL;
+
+void global_sig_handler(int sig) {
+    if (serveur::instance) {
+        serveur::instance->sig_ctrl_c(sig);
+    }
+}
+
+
+void serveur::handle_sigint(int sig) {
+    if (sig == SIGINT) {
+        if (instance->numEvents > 0) {
+            instance->EveryDelete(instance->_epollFd, instance->_events, instance->_event);
+        }
+		else
+        delete[] instance->_events;
+        close(instance->_epollFd);
+        close(instance->_socket);
+        exit(0); // Terminer le programme proprement avec le code de sortie 0
+    }
+}
+
+
+
+void serveur::sig_ctrl_c(int sig) {
+    if (instance) {
+        instance->handle_sigint(sig);
+    }
+}
+
 /*
 			COMMENT ENVOYER ET RECEVOIR FICHIER
 
@@ -441,6 +459,7 @@ int	serveur::verifOP(int socker, std::string command)
 			Poour le Kick penser a bien verifier quil detiens bien les proprieter de moderator +o [FAIT]
 			Rajouter si membre operator a quitter chann doit pouvoit donner les pouvoir au second qui a rejoint [rajouter]
 			Envoyer message a tout le monde quand quitte channels.[Fait]
+
 
 
 */

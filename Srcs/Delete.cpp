@@ -91,9 +91,22 @@ void serveur::DeleteChan(int socket)
     }
 }
 
-void    serveur::EveryDelete(int epollFd, epoll_event *events, epoll_event event)
-{
+// void    serveur::EveryDelete(int epollFd, epoll_event *events, epoll_event event)
+// {
     
+//     this->numEvents = epoll_wait(epollFd, events, MAX_EVENTS, -1);
+//     for (int i = 0; i < this->numEvents; ++i)
+//     {
+//         Delete(events[i].data.fd);
+//         epoll_ctl(epollFd,  EPOLL_CTL_DEL, events[i].data.fd, &event);
+//         close(events[i].data.fd);
+//         close(epollFd);
+//         close(this->_socket);
+//     }
+// }
+
+void serveur::EveryDelete(int epollFd, struct epoll_event* events, struct epoll_event event)
+{ 
     this->numEvents = epoll_wait(epollFd, events, MAX_EVENTS, -1);
     for (int i = 0; i < this->numEvents; ++i)
     {
@@ -104,4 +117,3 @@ void    serveur::EveryDelete(int epollFd, epoll_event *events, epoll_event event
         close(this->_socket);
     }
 }
-
