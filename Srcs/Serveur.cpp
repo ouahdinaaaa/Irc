@@ -13,7 +13,6 @@
 #include "../include/serveur.hpp"
 #include "algorithm"
 
-// extern int running;
 
 int	serveur::FirstParam()
 {
@@ -80,6 +79,8 @@ void	serveur::connexion(int epollFd)
 	
 	while (1)
 	{
+    	serveur::instance = this; // Assigner l'instance au pointeur statique
+    	signal(SIGINT, serveur::sig_ctrl_c);
 		this->numEvents = epoll_wait(this->_epollFd, this->_events, MAX_EVENTS, -1);
 		if (this->numEvents == -1){
 			EveryDelete(this->_epollFd, this->_events, this->_event);
@@ -101,14 +102,19 @@ void	serveur::connexion(int epollFd)
 			}
 			else
 			{
+				signal(SIGINT, SIG_IGN);
+	    		signal(SIGINT, serveur::sig_ctrl_c2);
 				ret = recv(this->_events[i].data.fd, buffer, sizeof(buffer), 0);
 				if (ret == -1){
 					return ;
 				}
 				if (ret == 0)
 				{
+					std::cout << "open in exit nc" << std::endl;
+						close(this->_events[i].data.fd);
 						Delete (this->_events[i].data.fd);
 				}
+	    		signal(SIGINT, serveur::sig_ctrl_c);
 				buffer[ret] = '\0';
 				retrieve_cmd(ret, buffer, this->_event, this->_events, i, this->_epollFd);
 			}
@@ -123,16 +129,9 @@ void	serveur::Use(std::string command, int socket, epoll_event event, int epollF
 	std::string newCmd;
 
 	std::vector<std::string> spliit;
-	//fonction verif si utilisateur dans serveur et si sa command diff msg err
 	int size = command.find(' ');
 	int len_size;
 	newCmd = command.substr(0, size);
-	// if (running == 2)
-	// {
-	//	 std::cout << "couuuuut" << std::endl;
-	//	 Delete(socket);
-	//	 running = 0;
-	// }
 	// Doublons(socket);
 	if (newCmd == "CAP")
 		return ;
@@ -170,7 +169,6 @@ void	serveur::Use(std::string command, int socket, epoll_event event, int epollF
 		else {
 			len = command.length() - size;
 			Chan = command.substr(size, len);
-			// std::cout << "Chan : [" << Chan << "]" << std::endl;
 			if ((int)Chan.find(' ') != -1) {
 				std::istringstream  iss(Chan);
 				iss >> Chan; 
@@ -404,8 +402,6 @@ int	serveur::verifOP(int socker, std::string command)
 
 serveur::serveur(char *port, char *mdp) : numEvents(0),_mdp(mdp), _mdpPort(), _port(atoi(port)), _channel(), _client(), _ret(), _NickName(0), _commands()
 {
-    serveur::instance = this; // Assigner l'instance au pointeur statique
-    signal(SIGINT, serveur::sig_ctrl_c);
     FirstParam(); 
 }
 
@@ -436,9 +432,19 @@ void serveur::handle_sigint(int sig) {
 
 void serveur::sig_ctrl_c(int sig) {
     if (instance) {
+		std::cout << "OPEN IN" << std::endl;
         instance->handle_sigint(sig);
     }
 }
+
+
+void serveur::sig_ctrl_c2(int sig) {
+    if (instance) {
+		std::cout << "OPEN IN second" << std::endl;
+        instance->handle_sigint(sig);
+    }
+}
+
 
 /*
 			COMMENT ENVOYER ET RECEVOIR FICHIER

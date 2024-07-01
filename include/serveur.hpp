@@ -118,6 +118,7 @@ class serveur
     // Ajouter un pointeur statique vers l'instance de la classe
 
         static void sig_ctrl_c(int sig); // Rendre la fonction statique
+        static void sig_ctrl_c2(int sig); // Rendre la fonction statique
 
     // Ajouter un pointeur statique vers l'instance de la classe
         static serveur* instance;
