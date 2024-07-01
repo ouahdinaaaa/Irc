@@ -79,7 +79,7 @@ void	serveur::connexion(int epollFd)
 	
 	while (1)
 	{
-    	serveur::instance = this; // Assigner l'instance au pointeur statique
+    	serveur::instance = this;
     	signal(SIGINT, serveur::sig_ctrl_c);
 		this->numEvents = epoll_wait(this->_epollFd, this->_events, MAX_EVENTS, -1);
 		if (this->numEvents == -1){
@@ -102,19 +102,15 @@ void	serveur::connexion(int epollFd)
 			}
 			else
 			{
-				signal(SIGINT, SIG_IGN);
-	    		signal(SIGINT, serveur::sig_ctrl_c2);
 				ret = recv(this->_events[i].data.fd, buffer, sizeof(buffer), 0);
 				if (ret == -1){
 					return ;
 				}
 				if (ret == 0)
 				{
-					std::cout << "open in exit nc" << std::endl;
-						close(this->_events[i].data.fd);
 						Delete (this->_events[i].data.fd);
+						close(this->_events[i].data.fd);
 				}
-	    		signal(SIGINT, serveur::sig_ctrl_c);
 				buffer[ret] = '\0';
 				retrieve_cmd(ret, buffer, this->_event, this->_events, i, this->_epollFd);
 			}
@@ -418,13 +414,20 @@ void global_sig_handler(int sig) {
 void serveur::handle_sigint(int sig) {
     if (sig == SIGINT) {
         if (instance->numEvents > 0) {
-            instance->EveryDelete(instance->_epollFd, instance->_events, instance->_event);
+		    for (int i = 0; i < this->numEvents; ++i)
+    		{
+        		Delete(this->_events[i].data.fd);
+        		epoll_ctl(this->_epollFd,  EPOLL_CTL_DEL, this->_events[i].data.fd, &this->_event);
+        		close(this->_events[i].data.fd);
+        		close(this->_epollFd);
+        		close(this->_socket);
+    		}
         }
 		else
         delete[] instance->_events;
         close(instance->_epollFd);
         close(instance->_socket);
-        exit(0); // Terminer le programme proprement avec le code de sortie 0
+        exit(0);
     }
 }
 
@@ -432,18 +435,11 @@ void serveur::handle_sigint(int sig) {
 
 void serveur::sig_ctrl_c(int sig) {
     if (instance) {
-		std::cout << "OPEN IN" << std::endl;
         instance->handle_sigint(sig);
+		exit(0);
     }
 }
 
-
-void serveur::sig_ctrl_c2(int sig) {
-    if (instance) {
-		std::cout << "OPEN IN second" << std::endl;
-        instance->handle_sigint(sig);
-    }
-}
 
 
 /*
