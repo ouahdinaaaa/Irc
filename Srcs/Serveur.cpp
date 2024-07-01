@@ -58,7 +58,10 @@ int	serveur::FirstParam()
 }
 
 serveur::~serveur()
-{ }
+{ 
+	this->_client.clear();
+	this->_channel.clear();
+}
 
 
 
@@ -423,10 +426,10 @@ void serveur::handle_sigint(int sig) {
         		close(this->_socket);
     		}
         }
-		else
         delete[] instance->_events;
         close(instance->_epollFd);
         close(instance->_socket);
+		instance->~serveur();
         exit(0);
     }
 }
