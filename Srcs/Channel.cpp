@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/09 19:42:15 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/06/11 13:12:29 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/07/02 15:39:46 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ void    Channel::choice_mode(std::string mode, Client name, std::string channel,
     }
     std::string Name = name.get_user();
     std::string User = name.get_name();
-    std::cout << "Mode : [" << mode << "] ||| Chan : [" << channel << "]" << std::endl;
+    // std::cout << "Mode : [" << mode << "] ||| Chan : [" << channel << "]" << std::endl;
     std::string message;
     if (mode[0] != '+' && mode[0] != '-')
         return ;

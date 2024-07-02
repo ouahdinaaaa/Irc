@@ -27,26 +27,22 @@ int	serveur::FirstParam()
 	serverAddress.sin_port = htons(this->_port);
 	serverAddress.sin_addr.s_addr = INADDR_ANY;
 	if (bind(this->_socket, (sockaddr*)&serverAddress, sizeof(serverAddress)) == -1) {
-		// Gestion de l'erreur
 		close(this->_socket);
 		return -1;
 	}
 	if (listen(this->_socket, SOMAXCONN) == -1) {
-		// Gestion de l'erreur
 		close(this->_socket);
 		return -1;
 	}
 	this->_epollFd = epoll_create1(0);
 	if (this->_epollFd == -1) {
-		// Gestion de l'erreur
 		close(this->_socket);
 		return -1;
 	}
-	this->_event.events = EPOLLIN; // Événements à surveiller (lecture et mode Edge Triggered)
+	this->_event.events = EPOLLIN;
 	this->_event.data.fd = this->_socket;
 
 	if (epoll_ctl(this->_epollFd, EPOLL_CTL_ADD, this->_socket, &this->_event) == -1) {
-		// Gestion de l'erreur
 		close(this->_socket);
 		close(this->_epollFd);
 		return -1;
@@ -131,17 +127,27 @@ void	serveur::Use(std::string command, int socket, epoll_event event, int epollF
 	int size = command.find(' ');
 	int len_size;
 	newCmd = command.substr(0, size);
-	// Doublons(socket);
-	std::cout << "ALL CMD : [" << command << "]" << std::endl;
-	std::cout << "DEBUT : [" << newCmd << "]" << std::endl;
+	Doublons(socket);
+	// std::cout << "ALL CMD : [" << command << "]" << std::endl;
+	// std::cout << "DEBUT : [" << newCmd << "]" << std::endl;
 	if (newCmd == "CAP")
 		return ;
 	if (verifOP(socket, newCmd))
 		return ;
 	if (newCmd == "NICK"){
+			std::cout << "\nOpen in NICK |||" <<  this->_ret[socket] << std::endl;
 		Chan = command.substr(size + 1, command.length());
-		if (UserExist(Chan))
+		if (UserExist(Chan) && this->_ret[socket] == 1)
 			return (this->_ret[socket] = 2,SendRPL(socket, ERR_NICKNAMEINUSE(Chan)));
+		else if (UserExist(Chan) && this->_ret[socket] == 2){
+				std::cout << "\n\nOpen in here" << std::endl;
+			std::vector<Client>::iterator it = std::find(this->_client.begin(), this->_client.end(), getUser(socket));
+			if (it != this->_client.end())
+			{
+				(*it).set_name(Chan); 
+				std::cout << "\n\nOpen in here" << std::endl;
+			}
+		}
 		if (Chan.length() > 8)
 			return ;			
 		this->_nick[socket] = Chan;
@@ -328,7 +334,7 @@ void	serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_event
 	} 
 	else 
 	{
-		std::cout << "open2" << std::endl;
+		// std::cout << "open2" << std::endl;
 		if ((int)string.find('\r') == -1){
 			this->_commands[events[i].data.fd] += string.substr(0, string.length() -1) + "\r\n";
 		} else {

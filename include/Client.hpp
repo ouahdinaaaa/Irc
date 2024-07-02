@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/08 16:42:46 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/02/13 16:17:51 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/07/02 15:31:48 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ class Client
     std::string     get_name() { return this->_name; };
     void            getInvitation(std::string &channel);
     void            set_user(std::string &name) { this->_name = name; };
+    void            set_name(std::string &name) { this->_user = name; };
     void            disconnect();
     void            SetImunite() {this->_imunite = 1; };
     void            Newlist(std::string channel);
