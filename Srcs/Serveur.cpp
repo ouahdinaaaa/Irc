@@ -132,6 +132,8 @@ void	serveur::Use(std::string command, int socket, epoll_event event, int epollF
 	int len_size;
 	newCmd = command.substr(0, size);
 	// Doublons(socket);
+	std::cout << "ALL CMD : [" << command << "]" << std::endl;
+	std::cout << "DEBUT : [" << newCmd << "]" << std::endl;
 	if (newCmd == "CAP")
 		return ;
 	if (verifOP(socket, newCmd))
@@ -319,21 +321,20 @@ void	serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_event
 	int j = 0;
 	int size;
 	int count = -1;
-	std::cout << "... STRING : [" << string << "]" << std::endl;
-	if (string.length() < 1)
-		close(events[i].data.fd);
+	std::cout << "... STRING : [" << string << "] ||| socket [" << events[i].data.fd  << "]" << std::endl;
 	if (((int)string.find('\n') == -1)) {
 		if ((int)string.find('\r') == -1)
 			this->_commands[events[i].data.fd] += string;
-	} else {
+	} 
+	else 
+	{
+		std::cout << "open2" << std::endl;
 		if ((int)string.find('\r') == -1){
-			this->_commands[events[i].data.fd] += string.substr(0, string.length() - 1) + "\r\n";
+			this->_commands[events[i].data.fd] += string.substr(0, string.length() -1) + "\r\n";
 		} else {
 			this->_commands[events[i].data.fd] += string + "\r\n"; }
 	}
-	// if (((int)string.find('\n') == -1 || string.length() < 2) && this->_commands[events[i].data.fd].length() > 0)
-	// 	 return ;
-	if (ret > 0 && this->_commands[events[i].data.fd].find('\n')) {
+	if (ret > 0 && ((int)this->_commands[events[i].data.fd].find('\n') != -1) ){
 		while (j < (int)this->_commands[events[i].data.fd].length()) {
 			size = this->_commands[events[i].data.fd].find('\n', j);
 			if (size == -1)
@@ -345,8 +346,8 @@ void	serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_event
 			command = "";
 			j = size + 1;
 		}
-	}
 	this->_commands[events[i].data.fd] = "";
+	}
 }
 
 void	Channel::ChangeClient(std::string mode, std::string name, int socket)
