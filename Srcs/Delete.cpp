@@ -6,23 +6,15 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 10:52:30 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/07/06 18:00:22 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/07/06 18:33:38 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/serveur.hpp"
 
 
-void serveur::Delete(int socket)
-{
-    for (std::vector<Client>::iterator it = this->_client.begin(); it != this->_client.end(); )
-    {
-        if (socket == it->get_socket())
-            it = this->_client.erase(it);
-        else
-            ++it;
-    }
-}
+
+
 
 void    serveur::DeleteServ(int socket)
 {
@@ -39,27 +31,35 @@ void    serveur::DeleteServ(int socket)
         this->_client = Newlist;
 }
 
-
-void serveur::DeleteChan(int socket)
+void serveur::Delete(int socket)
 {
-    for (std::vector<Channel>::iterator it = _channel.begin(); it != _channel.end();)
+    for (std::vector<Client>::iterator it = this->_client.begin(); it != this->_client.end(); )
     {
-        std::vector<Client> NewList;
-        std::vector<Client> client = (*it).get_client();
-
-        for (std::vector<Client>::iterator its = client.begin(); its != client.end(); its++) {
-            if (socket != (*its).get_socket())
-                NewList.push_back(*its);
-        }
-        if (NewList.empty()) {
-            it = _channel.erase(it);
-        } else {
-            it->ChangeList(NewList);
+        if (socket == it->get_socket())
+            it = this->_client.erase(it);
+        else
             ++it;
-        }
     }
 }
 
+void serveur::DeleteChan(int socket)
+{
+    for (std::vector<Channel>::iterator it = _channel.begin(); it != _channel.end();) {
+        std::vector<Client> clients = it->get_client(); 
+
+        for (std::vector<Client>::iterator its = clients.begin(); its != clients.end();)
+        {
+            if (socket == its->get_socket())
+                its = clients.erase(its); // Supprimez le client du vecteur de clients de ce canal
+            else
+                ++its;
+        }
+        if (clients.empty())
+            it = _channel.erase(it);
+        else
+            ++it;
+    }
+}
 
 
 void serveur::EveryDelete(int epollFd, struct epoll_event* events, struct epoll_event event)
@@ -74,3 +74,4 @@ void serveur::EveryDelete(int epollFd, struct epoll_event* events, struct epoll_
         close(this->_socket);
     }
 }
+
