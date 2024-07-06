@@ -75,7 +75,6 @@ void	serveur::connexion(int epollFd)
 	this->_event.events = EPOLLIN; 
 	int clientSocket;
 	CreateBot(epollFd, this->_event);
-	
 	while (1)
 	{
     	serveur::instance = this;
@@ -105,9 +104,8 @@ void	serveur::connexion(int epollFd)
 				if (ret == -1){
 					return ;
 				}
-				if (ret == 0)
-				{
-						Delete (this->_events[i].data.fd);
+				if (ret == 0){
+						Delete(this->_events[i].data.fd);
 						close(this->_events[i].data.fd);
 				}
 				buffer[ret] = '\0';
@@ -135,38 +133,36 @@ void	serveur::Use(std::string command, int socket, epoll_event event, int epollF
 	if (verifOP(socket, newCmd))
 		return ;
 	if (newCmd == "NICK"){
-			std::cout << "\nOpen in NICK |||" <<  this->_ret[socket] << std::endl;
 		Chan = command.substr(size + 1, command.length());
+		// std::cout << "\nOpen in NICK [" << socket << "]  |||" <<  this->_ret[socket] << "\n\n" << std::endl;
 		if (UserExist(Chan) && this->_ret[socket] == 1)
-			return (this->_ret[socket] = 2,SendRPL(socket, ERR_NICKNAMEINUSE(Chan)));
-		else if (UserExist(Chan) && this->_ret[socket] == 2){
-				std::cout << "\n\nOpen in here" << std::endl;
-			std::vector<Client>::iterator it = std::find(this->_client.begin(), this->_client.end(), getUser(socket));
-			if (it != this->_client.end())
-			{
-				(*it).set_name(Chan); 
-				std::cout << "\n\nOpen in here" << std::endl;
+			return (this->_ret[socket] = 2, SendRPL(socket, ERR_NICKNAMEINUSE(Chan)));
+		else if (this->_ret[socket] == 2 ||  this->_ret[socket] == 0){
+			for (std::vector<Client>::iterator it = this->_client.begin(); it != this->_client.end(); it++) {
+    			if (socket == (*it).get_socket()){
+        			Client user(Chan, (*it).get_name(), socket);
+					(*it).set_name(Chan);
+					if (this->_ret[socket] == 2){
+        				std::string msp = RPL_WELCOME(Chan);
+						Client user2 = getUser(socket);
+        				return (SendRPL(socket, msp)); 
+					}
+  				}
 			}
 		}
 		if (Chan.length() > 8)
 			return ;			
 		this->_nick[socket] = Chan;
-		if (this->_ret[socket] == 2) {
-			std::string msg = RPL_WELCOME(Chan);
-			return (SendRPL(socket, msg));
-		}
 		this->_ret[socket] = 0;
 		return ;
-	}
-	else if (newCmd == "PING")
+	} else if (newCmd == "PING")
 		return(SendRPL(socket, RPL_PONG));
 	else if (newCmd == "PASS"){
 		this->_ret[socket] = 1;
 		Chan = command.substr(size + 1, command.length());
 		this->_mdpPort[socket] = Chan;
 		return ;
-	}
-	else if (newCmd == "JOIN"){
+	} else if (newCmd == "JOIN"){
 		size = command.find('#') + 1;
 		int len = command.find(' ', size);
 		int key = 0;
@@ -186,21 +182,23 @@ void	serveur::Use(std::string command, int socket, epoll_event event, int epollF
 		}
 		JoinCommand(Chan, getUser(socket), socket, key);
 		return ;
-	}
-	else if (newCmd == "USER") {
+	} else if (newCmd == "USER") {
+		std::string msg;
 		this->_NickName = 0;
 		size_t pos = command.find(' ', size + 1);
 		Chan = command.substr(size + 1, pos - (size + 1));
-		if (this->_ret[socket] != 0)
+		if (this->_ret[socket] != 0 && this->_ret[socket] != 2)
 			return ;
 		Client user(this->_nick[socket], Chan, socket);
 		(*this)._client.push_back(user);
-		std::string msg = RPL_WELCOME(user.get_user());
+		if (this->_ret[socket] == 2)
+			return ;
+		if (!this->_ret[socket])
+			msg = RPL_WELCOME(user.get_user());
 		if (this->_mdp != this->_mdpPort[socket])
 			msg = ERR_PASSWDMISMATCH(Chan);
 		return(SendRPL(socket, msg));
-	}
-	else if (newCmd == "PART") {
+	} else if (newCmd == "PART") {
 		size = command.find(':');
 		if (size != -1) {
 			int len = size - command.find('#') - 2;
@@ -211,8 +209,7 @@ void	serveur::Use(std::string command, int socket, epoll_event event, int epollF
 				iss >> channel; 
 				}
 			PartCommand(channel, socket, Chan);
-		}
-		else  {
+		} else  {
 			size = command.find('#') + 1;
 			int len = command.length() - size;
 			std::string channels = command.substr(size, len);
@@ -226,6 +223,8 @@ void	serveur::Use(std::string command, int socket, epoll_event event, int epollF
 	}
 	len_size = command.find('#');
 	if (newCmd == "PRIVMSG" && len_size != -1)  {
+		Client user = getUser(socket);
+		// std::cout << "cmd : [" << command << "] ||| name : [" << user.get_name() << "]\nUser : [" << user.get_user() << "] ||| socket [" << user.get_socket() << "]" << std::endl;
 		size = command.find(':');
 		if (size == -1)
 		{
@@ -238,50 +237,43 @@ void	serveur::Use(std::string command, int socket, epoll_event event, int epollF
 		Chan = command.substr(size, command.length());
 		PrivMsg(Channel, Chan, socket);
 		return ;
-	}
-	else if (newCmd == "PRIVMSG" && len_size == -1)  {
+	} else if (newCmd == "PRIVMSG" && len_size == -1)  {
 		size = command.find(':') + 1;
 		int len = size - command.find(' ', 7) - 3;
 		std::string message = command.substr((command.find(' ', 7) + 1) , len);
 		Chan = command.substr(size, command.length());
 		PrivMsgClient(message, Chan, socket);
 		return ;
-	}
-	else if (newCmd == "KICK")  {
+	} else if (newCmd == "KICK")  {
 		size = command.find(':') + 1;
 		int len = command.find(':', command.find('#') + 1) - command.find('#') - 2 ;
 		std::string message = command.substr(command.find('#') + 1, len);
 		Chan = command.substr(size, command.length());
 		KickUser(message, Chan, socket);
 		return ;
-	}
-	else if (newCmd == "INVITE") {
+	} else if (newCmd == "INVITE") {
 		size = command.find('#') + 1;
 		int len = size - command.find(' ', 6) - 3;
 		std::string user = command.substr(command.find(' ', 6) + 1, len);
 		Chan = command.substr(size, command.length());
 		Invite(user, Chan, socket);
 		return ;
-	}
-	else if (newCmd == "TOPIC"){
+	} else if (newCmd == "TOPIC"){
 		size = command.find('#') + 1;
 		int len = command.find(':') - size - 1;
 		std::string channel = command.substr(size, len);
 		std::string topic = command.substr(command.find(':') + 1, command.length());
 		Topic(channel, topic, socket);
 		return ;
-	}
-	else if (newCmd == "NAMES")   {
+	} else if (newCmd == "NAMES")   {
 		size = command.find('#') + 1;
 		std::string channel = command.substr(size, command.length());
 		Names(channel, socket);
 		return ;
-	}
-	else if (newCmd == "WHOIS")  {
+	} else if (newCmd == "WHOIS")  {
 		Whois(socket);
 		return ;
-	}
-	else if (newCmd == "MODE") {
+	} else if (newCmd == "MODE") {
 		size = command.find('#') + 1;
 		if (!size) {
 			int len = command.find(' ', 5) - 5;
@@ -318,6 +310,14 @@ void	serveur::Use(std::string command, int socket, epoll_event event, int epollF
 		SendRPL(socket, msg);
 	}
 }
+
+void	serveur::ServeurPrint()
+{
+	for (std::vector<Client>::iterator it = this->_client.begin(); it != this->_client.end(); it++)
+	{
+		std::cout << "Name : [" << (*it).get_user() << "] ||| socket : [" << (*it).get_socket() << "]" << std::endl;
+	}
+}
    
 
 void	serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_event* events, int i, int epollFd)
@@ -327,14 +327,12 @@ void	serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_event
 	int j = 0;
 	int size;
 	int count = -1;
-	std::cout << "... STRING : [" << string << "] ||| socket [" << events[i].data.fd  << "]" << std::endl;
+	// std::cout << "... STRING : [" << string << "] ||| socket [" << events[i].data.fd  << "]\n" << std::endl;
+	ServeurPrint();
 	if (((int)string.find('\n') == -1)) {
 		if ((int)string.find('\r') == -1)
 			this->_commands[events[i].data.fd] += string;
-	} 
-	else 
-	{
-		// std::cout << "open2" << std::endl;
+	}  else {
 		if ((int)string.find('\r') == -1){
 			this->_commands[events[i].data.fd] += string.substr(0, string.length() -1) + "\r\n";
 		} else {
@@ -365,13 +363,10 @@ void	Channel::ChangeClient(std::string mode, std::string name, int socket)
 	iss >> word;
 	iss >> words;
 	
-		if (words.length() < 1)
-		{
+		if (words.length() < 1) {
 			std::string message = ERR_NEEDMOREPARAMS(name, "MODE");
 			SendRPL(socket, message);
-		}
-		for (std::vector<Client>::iterator it = _list.begin(); it != _list.end(); it++)
-		{
+		} for (std::vector<Client>::iterator it = _list.begin(); it != _list.end(); it++) {
 			if (words == (*it).get_user())
 				(*it).SetOperator(1);
 		}
@@ -380,8 +375,7 @@ void	Channel::ChangeClient(std::string mode, std::string name, int socket)
 void	serveur::Doublons(int socket)
 {
 	int count = 0;
-	for ( std::vector<Client>::iterator it = this->_client.begin(); it != this->_client.end(); it++)
-	{
+	for ( std::vector<Client>::iterator it = this->_client.begin(); it != this->_client.end(); it++) {
 		if (count == 1 && (*it).get_socket() == socket)
 			Delete(socket);
 		else if ((*it).get_socket() == socket)
@@ -392,13 +386,10 @@ void	serveur::Doublons(int socket)
 
 int	serveur::verifOP(int socker, std::string command)
 {
-	for (std::vector<Client>::iterator it = this->_client.begin(); it != this->_client.end(); it++)
-	{
+	for (std::vector<Client>::iterator it = this->_client.begin(); it != this->_client.end(); it++) {
 		if (socker == (*it).get_socket() || command == "USER" || command == "CAP" || command == "PASS" || command == "NICK")
 			return 0;
-	}
-	for (std::vector<Client>::iterator its = this->_client.begin(); its != this->_client.end(); its++)
-	{
+	} for (std::vector<Client>::iterator its = this->_client.begin(); its != this->_client.end(); its++) {
 		if (socker == (*its).get_socket() && ((*its).get_name().length() < 1 && (command != "USER")))
 			return (Delete(socker), 1);
 	}
@@ -449,7 +440,6 @@ void serveur::sig_ctrl_c(int sig) {
 		exit(0);
     }
 }
-
 
 
 /*
