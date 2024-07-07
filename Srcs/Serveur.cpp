@@ -105,6 +105,7 @@ void	serveur::connexion(int epollFd)
 					return ;
 				}
 				if (ret == 0){
+						DeleteChan(this->_events[i].data.fd);
 						Delete(this->_events[i].data.fd);
 						close(this->_events[i].data.fd);
 				}
@@ -126,15 +127,12 @@ void	serveur::Use(std::string command, int socket, epoll_event event, int epollF
 	int len_size;
 	newCmd = command.substr(0, size);
 	Doublons(socket);
-	// std::cout << "ALL CMD : [" << command << "]" << std::endl;
-	// std::cout << "DEBUT : [" << newCmd << "]" << std::endl;
-	if (newCmd == "CAP")
+	if (newCmd == "CAP" || newCmd == "WHO")
 		return ;
 	if (verifOP(socket, newCmd))
 		return ;
 	if (newCmd == "NICK"){
 		Chan = command.substr(size + 1, command.length());
-		// std::cout << "\nOpen in NICK [" << socket << "]  |||" <<  this->_ret[socket] << "\n\n" << std::endl;
 		if (UserExist(Chan) && this->_ret[socket] == 1)
 			return (this->_ret[socket] = 2, SendRPL(socket, ERR_NICKNAMEINUSE(Chan)));
 		else if (this->_ret[socket] == 2 ||  this->_ret[socket] == 0){
@@ -149,8 +147,7 @@ void	serveur::Use(std::string command, int socket, epoll_event event, int epollF
 					}
   				}
 			}
-		}
-		if (Chan.length() > 8)
+		} if (Chan.length() > 8)
 			return ;			
 		this->_nick[socket] = Chan;
 		this->_ret[socket] = 0;
@@ -224,7 +221,6 @@ void	serveur::Use(std::string command, int socket, epoll_event event, int epollF
 	len_size = command.find('#');
 	if (newCmd == "PRIVMSG" && len_size != -1)  {
 		Client user = getUser(socket);
-		// std::cout << "cmd : [" << command << "] ||| name : [" << user.get_name() << "]\nUser : [" << user.get_user() << "] ||| socket [" << user.get_socket() << "]" << std::endl;
 		size = command.find(':');
 		if (size == -1)
 		{
@@ -318,6 +314,14 @@ void	serveur::ServeurPrint()
 		std::cout << "Name : [" << (*it).get_user() << "] ||| socket : [" << (*it).get_socket() << "]" << std::endl;
 	}
 }
+
+void	Channel::ChannelPrint()
+{
+	for (std::vector<Client>::iterator it = this->_list.begin(); it != this->_list.end(); it++)
+	{
+		std::cout << " Channel List :\nName : [" << (*it).get_user() << "] ||| socket : [" << (*it).get_socket() << "]" << std::endl;
+	}
+}
    
 
 void	serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_event* events, int i, int epollFd)
@@ -327,8 +331,6 @@ void	serveur::retrieve_cmd(int ret, char *buffer, epoll_event event, epoll_event
 	int j = 0;
 	int size;
 	int count = -1;
-	// std::cout << "... STRING : [" << string << "] ||| socket [" << events[i].data.fd  << "]\n" << std::endl;
-	ServeurPrint();
 	if (((int)string.find('\n') == -1)) {
 		if ((int)string.find('\r') == -1)
 			this->_commands[events[i].data.fd] += string;
@@ -446,22 +448,5 @@ void serveur::sig_ctrl_c(int sig) {
 			COMMENT ENVOYER ET RECEVOIR FICHIER
 
 			- /dcc send <nickname> <filename> filename : nom du fichier
-			- /dcc accept connexion etablie grace au dcc maintenant le client doit laccepter puis recoit le fichier ||| sert a rien.
 			- recoit le fichier
-			-Parsing avec nc a regler [FAIT]
-			- Envoyer info dans l'odre sinon marche pas[veriier cette info]
-
-
-			verifier Valgrind
-			Verifier Valgrind leak
-			Faire bot implemeter command bot.
-			Envoie msg aleatoire plus couleur aleatoir [Fait]
-			Pour le Bot changer pour que le msg senvoie en pv [Fait]
-			nc tout est regler juste regles par rapport au port et faire test avec multitude de nc [faire test multi nc]
-			Poour le Kick penser a bien verifier quil detiens bien les proprieter de moderator +o [FAIT]
-			Rajouter si membre operator a quitter chann doit pouvoit donner les pouvoir au second qui a rejoint [rajouter]
-			Envoyer message a tout le monde quand quitte channels.[Fait]
-
-
-
 */

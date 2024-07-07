@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/08 17:06:55 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/06/11 12:21:43 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/07/07 12:56:04 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,9 +77,10 @@ class Channel
     std::vector<Client>  get_client() {return this->_list;};
     void                 verifSend(std::string &mode);
     void                 ChangeList(std::vector<Client> Newlist) {this->_list = Newlist;};
+    void                 ChannelPrint();
+    void                 DeleteChan(int socket);
 };
 
 std::string create_header();
-
 
 #endif

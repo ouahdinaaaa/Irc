@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/07 10:36:49 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/06/13 15:37:30 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/07/07 12:38:28 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@ void    SendRPL(int socket, std::string message) {
     ssize_t size =  send(socket, message.c_str(), message.length(), 0);
     if(size == -1)
         return ;
-        // std::cout << "You RPL in not good !!!" << std::endl;
 }
 
 void serveur::SendMsg(Channel &Channel, std::string msg, int socket, int boolean)
