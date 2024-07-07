@@ -234,9 +234,15 @@ void	serveur::Use(std::string command, int socket, epoll_event event, int epollF
 		PrivMsg(Channel, Chan, socket);
 		return ;
 	} else if (newCmd == "PRIVMSG" && len_size == -1)  {
+		int len;
+		int len2 = 0;
 		size = command.find(':') + 1;
-		int len = size - command.find(' ', 7) - 3;
-		std::string message = command.substr((command.find(' ', 7) + 1) , len);
+			if (size <= ((int)command.find(' ', 8)))
+				size++;
+			if ((int)command.find(' ', 8) - 7 < -7)
+				len2++;
+		len = size - command.find(' ', 7) - 3 + len2;
+		std::string message = command.substr((command.find(' ', 7) + 1), len);
 		Chan = command.substr(size, command.length());
 		PrivMsgClient(message, Chan, socket);
 		return ;
