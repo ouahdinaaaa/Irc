@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/09 19:42:15 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/07/02 15:39:46 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/07/08 12:33:53 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,16 +61,25 @@ void    Channel::choice_mode(std::string mode, Client name, std::string channel,
     std::string argument;
     if (size != -1)
     {
-        argument = mode.substr(size + 1, mode.length());
+        if (mode[0] == '+')
+        {
+                argument = mode.substr(size + 1, mode.length());
+            int i = 0;
+            while(argument[i])
+            {
+                if (!isdigit(argument[i]))
+                    return (SendRPL(socket, ERR_INVALIDKEY(name.get_user(), channel)));
+                i++;
+            }
+        }
         limit = atoi(argument.c_str());
         if (limit <= 0 && (mode[1] == 'l'))
             return (SendRPL(socket, ERR_INVALIDLIMIT(name.get_user(), channel)));
-        else if (limit <= 0 && (mode[1] == 'k'))
+        else if ((limit <= 0 && (mode[1] == 'k') && mode[0] == '+'))
             return (SendRPL(socket, ERR_INVALIDKEY(name.get_user(), channel)));
     }
     std::string Name = name.get_user();
     std::string User = name.get_name();
-    // std::cout << "Mode : [" << mode << "] ||| Chan : [" << channel << "]" << std::endl;
     std::string message;
     if (mode[0] != '+' && mode[0] != '-')
         return ;
@@ -97,16 +106,16 @@ void    Channel::choice_mode(std::string mode, Client name, std::string channel,
         {
             std::stringstream iss(mode);
             std::string word;
-            std::vector<std::string> words;
+            std::string word2;
 
             iss >> word;
-            iss >> word;
-            if (mode[0] == '+' && size) {
+            iss >> word2;
+            if (mode[0] == '+' && word2.length()) {
                 this->_mode_k = limit;
             }
-            else if (mode[0] == '+' && size == -1)
+            if ((mode[0] == '+') && !word2.length())
                 return (SendRPL(socket, ERR_INVALIDKEY(name.get_user(), channel)));
-            else if (mode[0] == '-')
+            if (mode[0] == '-')
                     this->_mode_k = 0;
             break ;
         }

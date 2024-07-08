@@ -6,7 +6,7 @@
 /*   By: ayael-ou <ayael-ou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 17:03:35 by ayael-ou          #+#    #+#             */
-/*   Updated: 2024/06/25 19:29:54 by ayael-ou         ###   ########.fr       */
+/*   Updated: 2024/07/08 12:25:42 by ayael-ou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,15 @@ int main(int argc, char **argv)
 {
     srand(time(NULL));
     if (argc != 3){
-        std::cout << "Error of params in you input. Port and mdp !!!" << std::endl;
+        std::cerr << "Error of params in you input. Port and mdp !!!" << std::endl;
         return 1;
+    }
+    int i = 0;
+    while(argv[1][i])
+    {
+        if (! isdigit(argv[1][i]))
+            return (std::cerr << "Error of params in you input. Port and mdp !!!" << std::endl, 1);
+        i++;
     }
     serveur prin(argv[1], argv[2]);
 }
